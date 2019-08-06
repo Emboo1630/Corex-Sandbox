@@ -3,7 +3,9 @@ package corexchange.issuerflows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.workflows.flows.redeem.RedeemTokensFlow
 import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokens
+import com.r3.corda.lib.tokens.workflows.flows.rpc.RedeemFungibleTokens
 import corexchange.states.WalletState
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
