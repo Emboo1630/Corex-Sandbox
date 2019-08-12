@@ -9,12 +9,14 @@ import corexchange.FINALIZING
 import corexchange.SIGNING
 import corexchange.VERIFYING
 import corexchange.contracts.UserContract
+import corexchange.states.OrderState
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateRef
 import net.corda.core.flows.CollectSignaturesFlow
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.StartableByRPC
+import net.corda.core.node.services.queryBy
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 

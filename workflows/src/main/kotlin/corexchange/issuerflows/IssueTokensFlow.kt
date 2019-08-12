@@ -21,6 +21,10 @@ class IssueTokensFlow (private val recipient: String,
         // Issue tokens from an Issuer Node -> Exchange Platform
         val input = inputOrderRefUsingLinearID(stringToLinearID(orderId)).state.data
         val tokens = FiatCurrency.getInstance(input.currency)
-        return subFlow(IssueTokens(listOf(input.amount of tokens issuedBy ourIdentity heldBy stringToParty(recipient))))
+        subFlow(IssueTokens(listOf(input.amount of tokens issuedBy ourIdentity heldBy stringToParty(recipient))))
+
+        // Remove Order
+        val order = inputOrderRefUsingLinearID(stringToLinearID(orderId)).state.data
+        return subFlow(CorexRemoveOrderFlow(recipient, orderId))
     }
 }
