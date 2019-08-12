@@ -1,9 +1,7 @@
 package corexchange.corexflows
 
 import corexchange.*
-import corexchange.states.OrderState
 import corexchange.states.UserState
-import corexchange.states.WalletState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.FlowLogic
