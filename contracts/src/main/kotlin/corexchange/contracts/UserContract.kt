@@ -19,5 +19,6 @@ class UserContract : Contract
     {
         class Register : TypeOnlyCommandData(), Commands
         class Transfer : TypeOnlyCommandData(), Commands
+        class Move : TypeOnlyCommandData(), Commands
     }
 }
