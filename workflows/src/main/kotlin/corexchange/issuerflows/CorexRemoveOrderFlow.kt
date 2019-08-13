@@ -11,7 +11,6 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
-@StartableByRPC
 class CorexRemoveOrderFlow (private val recipient: String,
                             private val orderId: String): IssuerFunctions()
 {
