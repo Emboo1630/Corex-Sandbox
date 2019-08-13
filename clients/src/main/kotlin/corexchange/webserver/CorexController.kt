@@ -1,5 +1,6 @@
 package corexchange.webserver
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
 import corexchange.userflows.UserRegisterFlow
 import corexchange.models.CorexRegisterModel
@@ -63,9 +64,11 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
     /**
      * Register a user account
      */
+
     @PostMapping(value = ["user/register"], produces = ["application/json"])
-    private fun registerUser(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>>
-    {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private fun registerUser(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>> {
+        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val register = CorexRegisterModel(
                     name = registerModel.name,

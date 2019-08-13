@@ -1,4 +1,4 @@
-package com.template.webserver
+package corexchange.webserver
 
 import org.springframework.boot.Banner
 import org.springframework.boot.SpringApplication
@@ -12,7 +12,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
  */
 @SpringBootApplication
 @EnableSwagger2
-@ComponentScan("com.template")
+@ComponentScan("corexchange")
 private open class Starter
 
 /**

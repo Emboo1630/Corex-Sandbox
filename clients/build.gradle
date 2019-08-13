@@ -24,6 +24,13 @@ dependencies {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
     }
 
+    //Swagger
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.7.0'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.7.0'
+
+    //Jackson
+    compile "net.corda:corda-jackson:$corda_release_version"
+
     // Logging.
     compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
     compile "org.apache.logging.log4j:log4j-web:${log4j_version}"
@@ -31,17 +38,23 @@ dependencies {
 }
 
 springBoot {
-    mainClassName = "com.template.webserver.ServerKt"
+    mainClassName = "corexchange.webserver.ServerKt"
 }
 
 task runTemplateClient(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.ClientKt'
+    main = 'corexchange.ClientKt'
     args 'localhost:10006', 'user1', 'test'
 }
 
-task runTemplateServer(type: JavaExec) {
+task CorexPlatformServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.webserver.ServerKt'
+    main = 'corexchange.webserver.ServerKt'
     args '--server.port=10050', '--config.rpc.host=localhost', '--config.rpc.port=10006', '--config.rpc.username=user1', '--config.rpc.password=test'
+}
+
+task IssuerPHP(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'corexchange.webserver.ServerKt'
+    args '--server.port=10051', '--config.rpc.host=localhost', '--config.rpc.port=10009', '--config.rpc.username=user1', '--config.rpc.password=test'
 }

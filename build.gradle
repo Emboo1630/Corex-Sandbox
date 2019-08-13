@@ -14,6 +14,7 @@ buildscript {
         spring_boot_gradle_plugin_version = '2.0.2.RELEASE'
         slf4j_version = '1.7.25'
         log4j_version = '2.9.1'
+        jackson_version = '2.9.7'
     }
 
     repositories {
@@ -29,6 +30,7 @@ buildscript {
         classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
         classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_gradle_plugin_version"
+        classpath "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
     }
 }
 
