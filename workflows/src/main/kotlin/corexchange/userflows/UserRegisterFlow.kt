@@ -3,6 +3,7 @@ package corexchange.userflows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import corexchange.*
 import corexchange.contracts.UserContract
 import corexchange.states.UserState

@@ -11,7 +11,9 @@ class UserContract : Contract
     {
         const val CONTRACT_ID = "corexchange.contracts.UserContract"
     }
-    override fun verify(tx: LedgerTransaction) {
+
+    override fun verify(tx: LedgerTransaction)
+    {
 
     }
 
