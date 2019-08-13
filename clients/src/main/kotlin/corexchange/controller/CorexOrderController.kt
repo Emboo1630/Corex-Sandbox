@@ -3,6 +3,8 @@ package corexchange.controller
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
 import corexchange.issuerflows.CorexOrderFlow
+import corexchange.issuerflows.IssueTokensFlow
+import corexchange.models.CorexIssueModel
 import corexchange.models.CorexOrderFlowModel
 import corexchange.models.CorexOrderModel
 import corexchange.states.OrderState
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("corexOrder")
-class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
+class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
     companion object
     {
         private val logger = LoggerFactory.getLogger(RestController::class.java)
@@ -28,7 +30,7 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
     /**
      * Return all users
      */
-    @GetMapping(value = ["users/all"], produces = ["application/json"])
+    @GetMapping(value = ["order/all"], produces = ["application/json"])
     private fun getAllUsers(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
@@ -39,7 +41,8 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
                 CorexOrderModel(
                         amount = it.amount,
                         currency = it.currency,
-                        issuer = it.issuer
+                        issuer = it.issuer,
+                        linearId = it.linearId
                 )
             }
             HttpStatus.CREATED to list
@@ -67,7 +70,7 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
      * Register a user account
      */
 
-    @PostMapping(value = ["user/register"], produces = ["application/json"])
+    @PostMapping(value = ["order/register"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
     private fun corexOrderFlowModel(@RequestBody corexOrderFlowModel: CorexOrderFlowModel): ResponseEntity<Map<String, Any>> {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
@@ -83,6 +86,44 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexOrderFlowModel
+        }
+        catch (e: Exception) {
+            HttpStatus.BAD_REQUEST to e
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+        val res = "result" to result
+
+        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+    }
+
+    /**
+     * Register a user account
+     */
+
+    @PostMapping(value = ["order/issue"], produces = ["application/json"])
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private fun corexIssueModel(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>> {
+        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+        val (status, result) = try {
+            val register = CorexIssueModel(
+                    recipient = corexIssueModel.recipient,
+                    orderId = corexIssueModel.orderId
+            )
+            val flowReturn = proxy.startFlowDynamic(
+                    IssueTokensFlow::class.java,
+                    register.orderId,
+                    register.orderId
+            )
+            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+            HttpStatus.CREATED to corexIssueModel
         }
         catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
