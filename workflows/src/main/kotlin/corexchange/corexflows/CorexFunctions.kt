@@ -38,8 +38,4 @@ abstract class CorexFunctions : FlowLogic<SignedTransaction>()
         return serviceHub.vaultService.queryBy<UserState>(criteria = criteria).states.single()
     }
 
-    fun inputOrderRefUsingLinearID(id: UniqueIdentifier): StateAndRef<OrderState> {
-        val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(id))
-        return serviceHub.vaultService.queryBy<OrderState>(criteria = criteria).states.single()
-    }
 }
