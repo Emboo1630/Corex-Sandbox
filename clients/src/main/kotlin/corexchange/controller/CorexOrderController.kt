@@ -31,9 +31,8 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * vault for OrderStates
      */
-
-    @GetMapping(value = ["order/all"], produces = ["application/json"])
-    private fun getOrderStates(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["order/getOrderStates"], produces = ["application/json"])
+    private fun corexGetOrderStates(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -72,7 +71,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
      * FungibleToken States
      */
     @GetMapping(value = ["order/getFungible"], produces = ["application/json"])
-    private fun getAllFungible(): ResponseEntity<Map<String, Any>>
+    private fun corexGetFungibleStates(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -108,10 +107,9 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * Order to OrderState
      */
-
     @PostMapping(value = ["order/orderFungible"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexOrderFlowModel(@RequestBody corexOrderFlowModel: CorexOrderFlowModel): ResponseEntity<Map<String, Any>> {
+    private fun corexOrderFungible(@RequestBody corexOrderFlowModel: CorexOrderFlowModel): ResponseEntity<Map<String, Any>> {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val register = CorexOrderFlowModel(
@@ -146,10 +144,9 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * Issue for OrderState
      */
-
     @PostMapping(value = ["order/issueFungible"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexIssueModel(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>> {
+    private fun corexIssueFungible(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>> {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val register = CorexIssueModel(
@@ -185,7 +182,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
      * Vault for PreOrderState
      */
     @GetMapping(value = ["users/getPreOrder"], produces = ["application/json"])
-    private fun getPreOrderState(): ResponseEntity<Map<String, Any>>
+    private fun corexGetPreOrderState(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -222,10 +219,9 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * PreOrderFlow at PreOrderState
      */
-
     @PostMapping(value = ["user/preOrder"],produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexPreOrderRegModel(@RequestBody corexPreOrderRegModel: CorexPreOrderRegModel):ResponseEntity<Map<String,Any>>
+    private fun corexPreOrder(@RequestBody corexPreOrderRegModel: CorexPreOrderRegModel):ResponseEntity<Map<String,Any>>
     {plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status,result) = try {
             val preOrder = CorexPreOrderRegModel(

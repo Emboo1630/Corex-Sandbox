@@ -36,8 +36,8 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     /**
      * Vault for UserState
      */
-    @GetMapping(value = ["users/all"], produces = ["application/json"])
-    private fun getAllUsers(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["/getUserState"], produces = ["application/json"])
+    private fun corexGetUser(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -71,16 +71,12 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         return ResponseEntity.status(status).body(mapOf(stat,mess,res))
     }
 
-
-
-
     /**
      * RegisterFlowAPI for UserState
      */
-
     @PostMapping(value = ["user/register"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun registerUser(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>> {
+    private fun corexRegister(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>> {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
 //        plugin.registerModule().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false)
         val (status, result) = try {
@@ -113,14 +109,12 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
-
     /**
      * MoveFlowAPI for UserState
      */
-
     @PostMapping(value = ["user/move"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexMoveModel(@RequestBody corexMoveModel: CorexMoveModel): ResponseEntity<Map<String, Any>> {
+    private fun correxMove(@RequestBody corexMoveModel: CorexMoveModel): ResponseEntity<Map<String, Any>> {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val register = CorexMoveModel(
@@ -159,10 +153,9 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     /**
      * ShareInfo at UserState
      */
-
     @PostMapping(value = ["user/shareInfo"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun shareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
+    private fun corexShareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
     {
         val (status, result) = try {
             val share = CorexShareInfoModel(
@@ -195,10 +188,9 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     /**
      * TransferToken at UserState
      */
-
     @PostMapping(value = ["user/transferTokens"],produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun transferTokens(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
+    private fun corexTransfer(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
     {plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status,result) = try {
             val transfer = CorexTransferTokenModel(
@@ -231,5 +223,4 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
 
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
-
 }
