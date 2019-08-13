@@ -1,16 +1,19 @@
 package corexchange.controller
 
-import corexchange.webserver.NodeRPCConnection
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import corexchange.corexflows.ShareInfoFlow
 import corexchange.corexflows.TransferTokensToUserFlow
 import corexchange.models.*
-import corexchange.userflows.UserRegisterFlow
+import corexchange.states.PreOrderState
 import corexchange.states.UserState
 import corexchange.userflows.MoveTokensFlow
+import corexchange.userflows.PreOrderFlow
+import corexchange.userflows.UserRegisterFlow
+import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
 import net.corda.core.messaging.vaultQueryBy
@@ -28,6 +31,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     }
 
     private val proxy = rpc.proxy
+
 
     /**
      * Vault for UserState
@@ -78,6 +82,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     @JsonIgnoreProperties(ignoreUnknown = true)
     private fun registerUser(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>> {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+//        plugin.registerModule().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false)
         val (status, result) = try {
             val register = CorexRegisterModel(
                     name = registerModel.name,
@@ -107,6 +112,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
 
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
+
 
     /**
      * MoveFlowAPI for UserState
@@ -196,13 +202,13 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     {plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status,result) = try {
             val transfer = CorexTransferTokenModel(
-                    transferTokenModel.amount,
+                    transferTokenModel.preOrderId,
                     transferTokenModel.walletRef,
                     transferTokenModel.userId
             )
             val flowReturn = proxy.startFlowDynamic(
                     TransferTokensToUserFlow::class.java,
-                    transfer.amount,
+                    transfer.preOrderId,
                     transfer.walletRef,
                     transfer.userId
             )
@@ -225,20 +231,5 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
 
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

@@ -29,3 +29,14 @@ data class CorexIssueModel @JsonCreator constructor(
         val orderId: String
 )
 
+data class CorexPreOrderModel @JsonCreator constructor(
+        val amount: Long,
+        val currency: String,
+        val linearId: String
+)
+
+data class CorexPreOrderRegModel @JsonCreator constructor(
+        val amount: Long,
+        val currency: String
+)
+
