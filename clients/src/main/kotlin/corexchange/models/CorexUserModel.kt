@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
 
 data class CorexUserModel(
@@ -22,4 +23,14 @@ data class CorexMoveModel @JsonCreator constructor(
          val receiverId: String,
          val amount: Long,
          val currency: String
+)
+
+data class CorexTransferTokenModel @JsonCreator constructor(
+        val amount: Long,
+        val walletRef: StateRef,
+        val userId: String
+)
+
+data class CorexShareInfoModel @JsonCreator constructor(
+        val recipient: String
 )

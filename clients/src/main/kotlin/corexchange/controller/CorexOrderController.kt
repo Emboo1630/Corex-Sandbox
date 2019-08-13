@@ -2,6 +2,7 @@ package corexchange.controller
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import corexchange.corexflows.ShareInfoFlow
 import corexchange.corexflows.TransferTokensToUserFlow
 import corexchange.issuerflows.CorexOrderFlow
@@ -43,6 +44,43 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
                         currency = it.currency,
                         issuer = it.issuer,
                         linearId = it.linearId.toString()
+                )
+            }
+            HttpStatus.CREATED to list
+        }
+        catch (e: Exception)
+        {
+            logger.info(e.message)
+            HttpStatus.BAD_REQUEST to "No users found."
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+
+        val res = "result" to result
+        return ResponseEntity.status(status).body(mapOf(stat,mess,res))
+    }
+
+    /**
+     * FungibleToken for UserState
+     */
+    @GetMapping(value = ["order/fungible"], produces = ["application/json"])
+    private fun getAllFungible(): ResponseEntity<Map<String, Any>>
+    {
+        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+        val (status, result) = try {
+            val infoStateRef = proxy.vaultQueryBy<FungibleToken>().states
+            val infoStates = infoStateRef.map { it.state.data }
+            val list = infoStates.map {
+                CorexFungibleTokenModel(
+                        amount = it.amount.toString(),
+                        holder = it.holder.toString()
                 )
             }
             HttpStatus.CREATED to list
@@ -141,71 +179,5 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
 
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
-    @PostMapping(value = ["issuer/shareinfo"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun shareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
-    {
-        val (status, result) = try {
-            val share = CorexShareInfoModel(
-                    recipient = shareInfoModel.recipient
-            )
-            val flowReturn = proxy.startFlowDynamic(
-                    ShareInfoFlow::class.java,
-                    share.recipient
-            )
-            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
-            HttpStatus.CREATED to shareInfoModel
-        }
-        catch (e: Exception) {
-            HttpStatus.BAD_REQUEST to e
-        }
-        val stat = "status" to status
-        val mess = if (status == HttpStatus.CREATED)
-        {
-            "message" to "Successful"
-        }
-        else
-        {
-            "message" to "Failed"
-        }
-        val res = "result" to result
 
-        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
-    }
-
-    @PostMapping(value = ["order/transfertokens"],produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun transferTokens(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
-    {
-        val (status,result) = try {
-            val transfer = CorexTransferTokenModel(
-                    transferTokenModel.amount,
-                    transferTokenModel.wallet,
-                    transferTokenModel.linearId
-            )
-            val flowReturn = proxy.startFlowDynamic(
-                    TransferTokensToUserFlow::class.java,
-                    transfer.amount,
-                    transfer.wallet,
-                    transfer.linearId
-            )
-            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
-            HttpStatus.CREATED to transferTokenModel
-        }
-        catch (e: Exception) {
-            HttpStatus.BAD_REQUEST to e
-        }
-        val stat = "status" to status
-        val mess = if (status == HttpStatus.CREATED)
-        {
-            "message" to "Successful"
-        }
-        else
-        {
-            "message" to "Failed"
-        }
-        val res = "result" to result
-
-        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
-    }
 }
