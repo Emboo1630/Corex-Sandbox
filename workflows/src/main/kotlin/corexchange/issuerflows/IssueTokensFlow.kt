@@ -1,13 +1,13 @@
 package corexchange.issuerflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
-import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.contracts.utilities.of
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokens
-import corexchange.states.WalletState
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.flows.*
+import net.corda.core.flows.InitiatingFlow
+import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.SignedTransaction
 
 @InitiatingFlow
@@ -20,8 +20,11 @@ class IssueTokensFlow (private val recipient: String,
     {
         // Issue tokens from an Issuer Node -> Exchange Platform
         val input = inputOrderRefUsingLinearID(stringToLinearID(orderId)).state.data
-        val tokenIssued = IssuedTokenType(ourIdentity, TokenType(input.currency, 2))
-        val fungibleToken = WalletState(Amount(input.amount, tokenIssued), stringToParty(recipient))
-        return subFlow(IssueTokens(listOf(fungibleToken)))
+        val tokens = FiatCurrency.getInstance(input.currency)
+        subFlow(IssueTokens(listOf(input.amount of tokens issuedBy ourIdentity heldBy stringToParty(recipient))))
+
+        // Remove Order
+        val order = inputOrderRefUsingLinearID(stringToLinearID(orderId)).state.data
+        return subFlow(CorexRemoveOrderFlow(recipient, orderId))
     }
 }

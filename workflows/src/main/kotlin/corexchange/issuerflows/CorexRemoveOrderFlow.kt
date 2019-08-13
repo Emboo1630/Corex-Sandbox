@@ -11,7 +11,6 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
-@StartableByRPC
 class CorexRemoveOrderFlow (private val recipient: String,
                             private val orderId: String): IssuerFunctions()
 {
@@ -49,9 +48,8 @@ class CorexRemoveOrderFlowResponder(private val flowSession: FlowSession): FlowL
     {
         subFlow(object : SignTransactionFlow(flowSession)
         {
-            override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val output = stx.tx.outputs.single().data
-                "This must be a remove order transaction" using (output is OrderState)
+            override fun checkTransaction(stx: SignedTransaction)
+            {
             }
         })
         return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession))

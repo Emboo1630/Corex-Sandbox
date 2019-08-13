@@ -9,7 +9,7 @@ class UserContract : Contract
 {
     companion object
     {
-        val CONTRACT_ID = "corexchange.contracts.UserContract"
+        const val CONTRACT_ID = "corexchange.contracts.UserContract"
     }
     override fun verify(tx: LedgerTransaction) {
 
@@ -18,6 +18,7 @@ class UserContract : Contract
     interface Commands : CommandData
     {
         class Register : TypeOnlyCommandData(), Commands
-        class Transfer: TypeOnlyCommandData(), Commands
+        class Transfer : TypeOnlyCommandData(), Commands
+        class Move : TypeOnlyCommandData(), Commands
     }
 }
