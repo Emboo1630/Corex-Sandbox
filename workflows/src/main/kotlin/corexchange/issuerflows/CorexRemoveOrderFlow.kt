@@ -18,11 +18,9 @@ class CorexRemoveOrderFlow (private val recipient: String,
     override fun call(): SignedTransaction
     {
         progressTracker.currentStep = CREATING
-        val remove = removeOrder()
-
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
-        val signedTransaction = verifyAndSign(remove)
+        val signedTransaction = verifyAndSign(removeOrder())
         val session = initiateFlow(stringToParty(recipient))
         val transactionSignedByParties = subFlow(CollectSignaturesFlow(signedTransaction, listOf(session)))
 

@@ -2,6 +2,7 @@ package corexchange.corexflows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
+import corexchange.*
 import corexchange.contracts.UserContract
 import corexchange.states.UserState
 import net.corda.core.contracts.Command
@@ -19,9 +20,15 @@ class ShareInfoFlow (private val recipient: String): CorexFunctions()
     @Suspendable
     override fun call(): SignedTransaction
     {
+        progressTracker.currentStep = CREATING
+        progressTracker.currentStep = VERIFYING
+        progressTracker.currentStep = SIGNING
         val signedTransaction = verifyAndSign(shareInfo())
         val session = initiateFlow(stringToParty(recipient))
         val transactionSignedByParties = subFlow(CollectSignaturesFlow(signedTransaction, listOf(session)))
+
+        progressTracker.currentStep = NOTARIZING
+        progressTracker.currentStep = FINALIZING
         return subFlow(FinalityFlow(transactionSignedByParties, listOf(session)))
     }
 

@@ -2,6 +2,7 @@ package corexchange.corexflows
 
 import corexchange.*
 import corexchange.states.OrderState
+import corexchange.states.PreOrderState
 import corexchange.states.UserState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -36,6 +37,11 @@ abstract class CorexFunctions : FlowLogic<SignedTransaction>()
     fun inputUserRefUsingLinearID(id: UniqueIdentifier): StateAndRef<UserState> {
         val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(id))
         return serviceHub.vaultService.queryBy<UserState>(criteria = criteria).states.single()
+    }
+
+    fun inputPreOrderRefUsingLinearID(id: UniqueIdentifier): StateAndRef<PreOrderState> {
+        val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(id))
+        return serviceHub.vaultService.queryBy<PreOrderState>(criteria = criteria).states.single()
     }
 
 }

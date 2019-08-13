@@ -7,7 +7,7 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 
 @BelongsToContract(OrderContract::class)
-data class OrderState(val amount: Long,
+data class OrderState (val amount: Long,
                       val currency: String,
                       val issuer: Party,
                       override val linearId: UniqueIdentifier,

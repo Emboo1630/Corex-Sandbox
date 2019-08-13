@@ -21,11 +21,9 @@ class CorexOrderFlow (private val amount: Long,
     override fun call(): SignedTransaction
     {
         progressTracker.currentStep = CREATING
-        val orderToken = order()
-
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
-        val signedTransaction = verifyAndSign(orderToken)
+        val signedTransaction = verifyAndSign(order())
 
         // Issue PHP to issuer php node if currency = PHP
         if (currency == "PHP")

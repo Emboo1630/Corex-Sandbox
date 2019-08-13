@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
+import corexchange.*
 import corexchange.contracts.UserContract
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Command
@@ -23,9 +24,16 @@ class MoveTokensFlow (private val senderId: String,
     @Suspendable
     override fun call(): SignedTransaction
     {
+        progressTracker.currentStep = CREATING
         val transaction = moveTokens()
+
+        progressTracker.currentStep = VERIFYING
+        progressTracker.currentStep = SIGNING
         val verify = verifyAndSign(transaction)
         val transactionSignedByBothParties: SignedTransaction = verify
+
+        progressTracker.currentStep = NOTARIZING
+        progressTracker.currentStep = FINALIZING
         return subFlow((FinalityFlow(transactionSignedByBothParties, listOf())))
     }
 
