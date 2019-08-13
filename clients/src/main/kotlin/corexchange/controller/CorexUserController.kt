@@ -1,11 +1,15 @@
-package corexchange.webserver
+package corexchange.controller
+
+import corexchange.webserver.NodeRPCConnection
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
+import corexchange.models.CorexMoveModel
 import corexchange.userflows.UserRegisterFlow
 import corexchange.models.CorexRegisterModel
 import corexchange.models.CorexUserModel
 import corexchange.states.UserState
+import corexchange.userflows.MoveTokensFlow
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
 import net.corda.core.messaging.vaultQueryBy
@@ -16,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("corex")
-class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
+class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
     companion object
     {
         private val logger = LoggerFactory.getLogger(RestController::class.java)
@@ -37,7 +41,8 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
             val list = infoStates.map {
                 CorexUserModel(
                         name = it.name,
-                        wallet = it.wallet
+                        wallet = it.wallet,
+                        linearId = it.linearId.toString()
                 )
             }
             HttpStatus.CREATED to list
@@ -81,6 +86,48 @@ class CorexController(rpc: NodeRPCConnection, private val flowHandlerCompletion:
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to registerModel
+        }
+        catch (e: Exception) {
+            HttpStatus.BAD_REQUEST to e
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+        val res = "result" to result
+
+        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+    }
+
+    /**
+     * Register a user account
+     */
+
+    @PostMapping(value = ["user/move"], produces = ["application/json"])
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private fun corexMoveModel(@RequestBody corexMoveModel: CorexMoveModel): ResponseEntity<Map<String, Any>> {
+        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+        val (status, result) = try {
+            val register = CorexMoveModel(
+                    senderId = corexMoveModel.senderId,
+                    receiverId = corexMoveModel.receiverId,
+                    amount = corexMoveModel.amount,
+                    currency = corexMoveModel.currency
+            )
+            val flowReturn = proxy.startFlowDynamic(
+                    MoveTokensFlow::class.java,
+                    register.senderId,
+                    register.receiverId,
+                    register.amount,
+                    register.currency
+            )
+            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+            HttpStatus.CREATED to corexMoveModel
         }
         catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e

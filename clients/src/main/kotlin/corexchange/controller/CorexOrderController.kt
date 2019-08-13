@@ -119,7 +119,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
             )
             val flowReturn = proxy.startFlowDynamic(
                     IssueTokensFlow::class.java,
-                    register.orderId,
+                    register.recipient,
                     register.orderId
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)

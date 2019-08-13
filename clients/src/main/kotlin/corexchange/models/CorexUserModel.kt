@@ -2,11 +2,14 @@ package corexchange.models
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.UniqueIdentifier
 
 data class CorexUserModel(
         val name: String,
-        val wallet: List<Amount<TokenType>>
+        val wallet: List<Amount<TokenType>>,
+        val linearId: String
 )
 
 data class CorexRegisterModel @JsonCreator constructor(
@@ -14,4 +17,9 @@ data class CorexRegisterModel @JsonCreator constructor(
         val wallet: List<Amount<TokenType>>
 )
 
-//data class
+data class CorexMoveModel @JsonCreator constructor(
+         val senderId: String,
+         val receiverId: String,
+         val amount: Long,
+         val currency: String
+)
