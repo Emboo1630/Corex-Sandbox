@@ -1,5 +1,4 @@
 package corexchange.userflows
-
 import corexchange.*
 import corexchange.states.UserState
 import net.corda.core.contracts.StateAndRef

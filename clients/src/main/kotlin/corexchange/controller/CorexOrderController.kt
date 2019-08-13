@@ -2,11 +2,11 @@ package corexchange.controller
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
+import corexchange.corexflows.ShareInfoFlow
+import corexchange.corexflows.TransferTokensToUserFlow
 import corexchange.issuerflows.CorexOrderFlow
 import corexchange.issuerflows.IssueTokensFlow
-import corexchange.models.CorexIssueModel
-import corexchange.models.CorexOrderFlowModel
-import corexchange.models.CorexOrderModel
+import corexchange.models.*
 import corexchange.states.OrderState
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
@@ -42,7 +42,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
                         amount = it.amount,
                         currency = it.currency,
                         issuer = it.issuer,
-                        linearId = it.linearId
+                        linearId = it.linearId.toString()
                 )
             }
             HttpStatus.CREATED to list
@@ -124,6 +124,73 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexIssueModel
+        }
+        catch (e: Exception) {
+            HttpStatus.BAD_REQUEST to e
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+        val res = "result" to result
+
+        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+    }
+    @PostMapping(value = ["issuer/shareinfo"], produces = ["application/json"])
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private fun shareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
+    {
+        val (status, result) = try {
+            val share = CorexShareInfoModel(
+                    recipient = shareInfoModel.recipient
+            )
+            val flowReturn = proxy.startFlowDynamic(
+                    ShareInfoFlow::class.java,
+                    share.recipient
+            )
+            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+            HttpStatus.CREATED to shareInfoModel
+        }
+        catch (e: Exception) {
+            HttpStatus.BAD_REQUEST to e
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+        val res = "result" to result
+
+        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+    }
+
+    @PostMapping(value = ["order/transfertokens"],produces = ["application/json"])
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private fun transferTokens(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
+    {
+        val (status,result) = try {
+            val transfer = CorexTransferTokenModel(
+                    transferTokenModel.amount,
+                    transferTokenModel.wallet,
+                    transferTokenModel.linearId
+            )
+            val flowReturn = proxy.startFlowDynamic(
+                    TransferTokensToUserFlow::class.java,
+                    transfer.amount,
+                    transfer.wallet,
+                    transfer.linearId
+            )
+            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+            HttpStatus.CREATED to transferTokenModel
         }
         catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
