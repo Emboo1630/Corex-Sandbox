@@ -55,12 +55,23 @@ class UserRegisterFlow (private val name: String,
     private fun amountAndCurrencyToTokenType(): MutableList<Amount<TokenType>>
     {
         var index = 0
-        val listOfAmountCurrencyAndFractionDigits = mutableListOf(Amount(amount[index], TokenType(tokenIdentifier = currency[index], fractionDigits = fractionDigits[index])))
+        val listOfAmountCurrencyAndFractionDigits =
+                mutableListOf(Amount(amount[index], TokenType(tokenIdentifier = currency[index],
+                        fractionDigits = fractionDigits[index])))
         val iterate = amount.map { it }.size
         listOfAmountCurrencyAndFractionDigits.removeAt(index)
         while(index != iterate)
         {
-            listOfAmountCurrencyAndFractionDigits.add(Amount(amount[index],TokenType(tokenIdentifier = currency[index], fractionDigits = fractionDigits[index])))
+            if(currency[index] == "PHP" || currency[index] == "USD")
+            {
+                listOfAmountCurrencyAndFractionDigits.add(Amount(amount[index],FiatCurrency.getInstance(currency[index])))
+            }
+            else
+            {
+                listOfAmountCurrencyAndFractionDigits.add(Amount(amount[index], TokenType(tokenIdentifier = currency[index],
+                        fractionDigits = fractionDigits[index])))
+
+            }
             index++
         }
         return listOfAmountCurrencyAndFractionDigits
