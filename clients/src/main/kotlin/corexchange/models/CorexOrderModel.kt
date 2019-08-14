@@ -10,13 +10,8 @@ import net.corda.core.identity.Party
 data class CorexOrderModel(
         val amount: Long,
         val currency: String,
-        val issuer: Party,
+        val issuer: String,
         val linearId: String
-)
-
-data class CorexFungibleTokenModel(
-        val amount: String,
-        val holder: String
 )
 
 data class CorexOrderFlowModel @JsonCreator constructor(
@@ -24,10 +19,6 @@ data class CorexOrderFlowModel @JsonCreator constructor(
         val currency: String
 )
 
-data class CorexIssueModel @JsonCreator constructor(
-        val recipient: String,
-        val orderId: String
-)
 
 data class CorexPreOrderModel @JsonCreator constructor(
         val amount: Long,

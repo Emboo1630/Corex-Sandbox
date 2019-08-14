@@ -15,10 +15,11 @@ data class CorexUserModel(
         val linearId: String
 )
 
-
 data class CorexRegisterModel @JsonCreator constructor(
         val name: String,
-        val wallet: List<Amount<TokenType>>
+        val amount: MutableList<Long>,
+        val currency: MutableList<String>,
+        val fractionDigits: MutableList<Int>
 )
 
 data class CorexMoveModel @JsonCreator constructor(
@@ -30,7 +31,7 @@ data class CorexMoveModel @JsonCreator constructor(
 
 data class CorexTransferTokenModel @JsonCreator constructor(
         val preOrderId: String,
-        val walletRef: StateRef,
+        val walletRef: String,
         val userId: String
 )
 

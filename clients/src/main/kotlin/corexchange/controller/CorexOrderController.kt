@@ -42,45 +42,8 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
                 CorexOrderModel(
                         amount = it.amount,
                         currency = it.currency,
-                        issuer = it.issuer,
+                        issuer = it.issuer.toString(),
                         linearId = it.linearId.toString()
-                )
-            }
-            HttpStatus.CREATED to list
-        }
-        catch (e: Exception)
-        {
-            logger.info(e.message)
-            HttpStatus.BAD_REQUEST to "No users found."
-        }
-        val stat = "status" to status
-        val mess = if (status == HttpStatus.CREATED)
-        {
-            "message" to "Successful"
-        }
-        else
-        {
-            "message" to "Failed"
-        }
-
-        val res = "result" to result
-        return ResponseEntity.status(status).body(mapOf(stat,mess,res))
-    }
-
-    /**
-     * FungibleToken States
-     */
-    @GetMapping(value = ["order/getFungible"], produces = ["application/json"])
-    private fun corexGetFungibleStates(): ResponseEntity<Map<String, Any>>
-    {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-        val (status, result) = try {
-            val infoStateRef = proxy.vaultQueryBy<FungibleToken>().states
-            val infoStates = infoStateRef.map { it.state.data }
-            val list = infoStates.map {
-                CorexFungibleTokenModel(
-                        amount = it.amount.toString(),
-                        holder = it.holder.toString()
                 )
             }
             HttpStatus.CREATED to list
@@ -141,42 +104,6 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
-    /**
-     * Issue for OrderState
-     */
-    @PostMapping(value = ["order/issueFungible"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexIssueFungible(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>> {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-        val (status, result) = try {
-            val register = CorexIssueModel(
-                    recipient = corexIssueModel.recipient,
-                    orderId = corexIssueModel.orderId
-            )
-            val flowReturn = proxy.startFlowDynamic(
-                    IssueTokensFlow::class.java,
-                    register.recipient,
-                    register.orderId
-            )
-            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
-            HttpStatus.CREATED to corexIssueModel
-        }
-        catch (e: Exception) {
-            HttpStatus.BAD_REQUEST to e
-        }
-        val stat = "status" to status
-        val mess = if (status == HttpStatus.CREATED)
-        {
-            "message" to "Successful"
-        }
-        else
-        {
-            "message" to "Failed"
-        }
-        val res = "result" to result
-
-        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
-    }
 
     /**
      * Vault for PreOrderState

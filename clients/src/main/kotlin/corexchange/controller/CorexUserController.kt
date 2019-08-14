@@ -82,12 +82,16 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         val (status, result) = try {
             val register = CorexRegisterModel(
                     name = registerModel.name,
-                    wallet = registerModel.wallet
+                    amount = registerModel.amount,
+                    currency = registerModel.currency,
+                    fractionDigits = registerModel.fractionDigits
             )
             val flowReturn = proxy.startFlowDynamic(
                     UserRegisterFlow::class.java,
                     register.name,
-                    register.wallet
+                    register.amount,
+                    register.currency,
+                    register.fractionDigits
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to registerModel
