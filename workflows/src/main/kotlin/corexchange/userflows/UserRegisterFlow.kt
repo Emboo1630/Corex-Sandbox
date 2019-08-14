@@ -1,25 +1,16 @@
 package corexchange.userflows
 
-import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
-import com.r3.corda.lib.tokens.contracts.types.TokenType
-import com.r3.corda.lib.tokens.money.DigitalCurrency
-import com.r3.corda.lib.tokens.money.FiatCurrency
 import corexchange.*
+import net.corda.core.contracts.*
+import net.corda.core.flows.*
+import net.corda.core.transactions.*
+import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import corexchange.contracts.UserContract
 import corexchange.states.UserState
-import jdk.nashorn.internal.parser.Token
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.Command
-import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.flows.CollectSignaturesFlow
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.StartableByRPC
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.TransactionBuilder
-import org.apache.commons.lang.mutable.Mutable
-import org.hibernate.mapping.IndexedCollection
-import java.util.ArrayList
+
 
 @StartableByRPC
 class UserRegisterFlow (private val name: String,
@@ -70,7 +61,6 @@ class UserRegisterFlow (private val name: String,
             {
                 listOfAmountCurrencyAndFractionDigits.add(Amount(amount[index], TokenType(tokenIdentifier = currency[index],
                         fractionDigits = fractionDigits[index])))
-
             }
             index++
         }

@@ -4,16 +4,11 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.workflows.flows.rpc.RedeemFungibleTokens
-import corexchange.*
 import corexchange.contracts.UserContract
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.Command
-import net.corda.core.contracts.StateRef
-import net.corda.core.flows.CollectSignaturesFlow
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.StartableByRPC
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.TransactionBuilder
+import corexchange.*
+import net.corda.core.flows.*
+import net.corda.core.contracts.*
+import net.corda.core.transactions.*
 
 @StartableByRPC
 class TransferTokensToUserFlow (private val preOrderId: String,

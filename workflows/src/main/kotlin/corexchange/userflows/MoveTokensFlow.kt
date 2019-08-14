@@ -1,19 +1,14 @@
 package corexchange.userflows
 
+import corexchange.*
+import net.corda.core.contracts.*
+import net.corda.core.flows.*
+import net.corda.core.transactions.*
+import corexchange.contracts.UserContract
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
-import corexchange.*
-import corexchange.contracts.UserContract
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.Command
-import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.InitiatingFlow
-import net.corda.core.flows.StartableByRPC
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.TransactionBuilder
 
 @StartableByRPC
 class MoveTokensFlow (private val senderId: String,
