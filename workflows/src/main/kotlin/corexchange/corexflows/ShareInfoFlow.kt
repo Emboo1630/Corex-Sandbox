@@ -7,8 +7,7 @@ import corexchange.contracts.UserContract
 import corexchange.states.UserState
 import net.corda.core.contracts.Command
 import net.corda.core.flows.*
-import net.corda.core.node.services.Vault
-import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.*
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder

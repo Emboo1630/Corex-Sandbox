@@ -3,14 +3,11 @@ package corexchange.issuerflows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import corexchange.*
+import net.corda.core.flows.*
+import net.corda.core.contracts.*
+import net.corda.core.transactions.*
 import corexchange.contracts.OrderContract
 import corexchange.states.OrderState
-import net.corda.core.contracts.Command
-import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.contracts.requireThat
-import net.corda.core.flows.*
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC

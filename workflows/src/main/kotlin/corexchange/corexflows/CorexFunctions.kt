@@ -1,19 +1,14 @@
 package corexchange.corexflows
 
 import corexchange.*
-import corexchange.states.OrderState
-import corexchange.states.PreOrderState
-import corexchange.states.UserState
-import net.corda.core.contracts.StateAndRef
-import net.corda.core.contracts.StateRef
-import net.corda.core.contracts.UniqueIdentifier
+import corexchange.states.*
+import net.corda.core.contracts.*
+import net.corda.core.transactions.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.Party
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 
 abstract class CorexFunctions : FlowLogic<SignedTransaction>()
