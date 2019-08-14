@@ -3,6 +3,7 @@ package corexchange.corexflows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import corexchange.CREATING
+import corexchange.FINALIZING
 import corexchange.SIGNING
 import corexchange.VERIFYING
 import corexchange.contracts.PreOrderContract
@@ -20,6 +21,8 @@ class CorexRemovePreOrderFlow (private val preOrderId: String): CorexFunctions()
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
         val signedTransaction = verifyAndSign(removePreOrder())
+
+        progressTracker.currentStep = FINALIZING
         return subFlow(FinalityFlow(signedTransaction, listOf()))
     }
 
