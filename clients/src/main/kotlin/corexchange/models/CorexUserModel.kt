@@ -29,7 +29,7 @@ data class CorexMoveModel @JsonCreator constructor(
 )
 
 data class CorexTransferTokenModel @JsonCreator constructor(
-        val preOrderId: Long,
+        val preOrderId: String,
         val walletRef: StateRef,
         val userId: String
 )

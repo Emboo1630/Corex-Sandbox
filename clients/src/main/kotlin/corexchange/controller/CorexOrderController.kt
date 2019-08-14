@@ -181,7 +181,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * Vault for PreOrderState
      */
-    @GetMapping(value = ["users/getPreOrder"], produces = ["application/json"])
+    @GetMapping(value = ["order/getPreOrder"], produces = ["application/json"])
     private fun corexGetPreOrderState(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
@@ -219,7 +219,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * PreOrderFlow at PreOrderState
      */
-    @PostMapping(value = ["user/preOrder"],produces = ["application/json"])
+    @PostMapping(value = ["order/preOrder"],produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
     private fun corexPreOrder(@RequestBody corexPreOrderRegModel: CorexPreOrderRegModel):ResponseEntity<Map<String,Any>>
     {plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
