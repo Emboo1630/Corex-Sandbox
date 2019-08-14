@@ -17,7 +17,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @StartableByRPC
 class TransferTokensToUserFlow (private val preOrderId: String,
-                                private val walletRef: StateRef,
+                                private val walletRef: String,
                                 private val userId: String): CorexFunctions()
 {
     @Suspendable
@@ -35,7 +35,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
 
         // Update Corex Wallet
         val preOrder = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
-        val wallet = serviceHub.toStateAndRef<FungibleToken>(walletRef).state.data
+        val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
         subFlow(RedeemFungibleTokens(Amount(preOrder.amount, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
 
         // Remove Order
@@ -46,7 +46,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
     private fun newWallet(): MutableList<Amount<TokenType>>
     {
         val preOrder = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
-        val wallet = serviceHub.toStateAndRef<FungibleToken>(walletRef).state.data
+        val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
         val user = inputUserRefUsingLinearID(stringToLinearID(userId)).state.data
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == preOrder.currency && x.token.tokenIdentifier == wallet.tokenType.tokenIdentifier}
         val newUserWallet= user.wallet.minus(filteredListOfWallet[0])

@@ -5,7 +5,9 @@ import corexchange.states.OrderState
 import corexchange.states.PreOrderState
 import corexchange.states.UserState
 import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.Party
 import net.corda.core.node.services.queryBy
@@ -44,4 +46,8 @@ abstract class CorexFunctions : FlowLogic<SignedTransaction>()
         return serviceHub.vaultService.queryBy<PreOrderState>(criteria = criteria).states.single()
     }
 
+    fun stringToStateRef(stateRef: String): StateRef
+    {
+        return StateRef(txhash = SecureHash.parse(stateRef), index = 0)
+    }
 }
