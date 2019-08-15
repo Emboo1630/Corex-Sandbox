@@ -55,12 +55,17 @@ class UserRegisterFlow (private val name: String,
         {
             if(currency[index] == "PHP" || currency[index] == "USD")
             {
-                listOfAmountCurrencyAndFractionDigits.add(Amount(amount[index],FiatCurrency.getInstance(currency[index])))
+                listOfAmountCurrencyAndFractionDigits.add(
+                        Amount(amount[index] * 100,
+                                FiatCurrency.getInstance(currency[index])))
             }
             else
             {
-                listOfAmountCurrencyAndFractionDigits.add(Amount(amount[index], TokenType(tokenIdentifier = currency[index],
-                        fractionDigits = fractionDigits[index])))
+                // TODO - multiply by 10 depending on the fraction digits
+                listOfAmountCurrencyAndFractionDigits.add(
+                        Amount(amount[index], TokenType(
+                                tokenIdentifier = currency[index],
+                                fractionDigits = fractionDigits[index])))
             }
             index++
         }

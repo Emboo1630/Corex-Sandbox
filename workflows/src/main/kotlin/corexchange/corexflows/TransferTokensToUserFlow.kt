@@ -36,7 +36,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
             subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
         }
 
-        // Remove Order
+        // Remove Pre-Order from user -> platform
         return subFlow(CorexRemovePreOrderFlow(preOrderId))
     }
 
@@ -48,7 +48,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
         val user = inputUserRefUsingLinearID(stringToLinearID(userId)).state.data
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == preOrder.currency && x.token.tokenIdentifier == wallet.tokenType.tokenIdentifier}
         val newUserWallet= user.wallet.minus(filteredListOfWallet[0])
-        val newQuantity = filteredListOfWallet[0].quantity + preOrder.amount
+        val newQuantity = filteredListOfWallet[0].quantity + (preOrder.amount * 100)
         val newElement= Amount(newQuantity, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits))
         return newUserWallet.plus(newElement).toMutableList()
     }
