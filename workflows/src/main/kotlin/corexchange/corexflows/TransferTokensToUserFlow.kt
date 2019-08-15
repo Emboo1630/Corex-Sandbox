@@ -16,8 +16,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
                                 private val userId: String): CorexFunctions()
 {
     @Suspendable
-    override fun call(): SignedTransaction
-    {
+    override fun call(): SignedTransaction {
         progressTracker.currentStep = CREATING
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
@@ -31,7 +30,11 @@ class TransferTokensToUserFlow (private val preOrderId: String,
         // Update Corex Wallet
         val preOrder = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
         val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
-        subFlow(RedeemFungibleTokens(Amount(preOrder.amount, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
+        if (wallet.tokenType.tokenIdentifier == "PHP" || wallet.tokenType.tokenIdentifier == "USD")
+        {
+            val amountWithCurrency = preOrder.amount * 100
+            subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
+        }
 
         // Remove Order
         return subFlow(CorexRemovePreOrderFlow(preOrderId))
