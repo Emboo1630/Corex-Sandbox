@@ -18,19 +18,21 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("corexFungible")
-class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
-    companion object {
+@RequestMapping("corextoken")
+class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin)
+{
+    companion object
+    {
         private val logger = LoggerFactory.getLogger(RestController::class.java)
     }
 
     private val proxy = rpc.proxy
 
     /**
-     * FungibleToken States
+     * Get all corex fungible tokens
      */
-    @GetMapping(value = ["order/getFungible"], produces = ["application/json"])
-    private fun corexGetFungibleStates(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["get/fungible"], produces = ["application/json"])
+    private fun getFungibleTokens(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -43,11 +45,10 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
                 )
             }
             HttpStatus.CREATED to list
-        }
-        catch (e: Exception)
+        } catch (e: Exception)
         {
             logger.info(e.message)
-            HttpStatus.BAD_REQUEST to "No users found."
+            HttpStatus.BAD_REQUEST to "No fungible tokens found."
         }
         val stat = "status" to status
         val mess = if (status == HttpStatus.CREATED)
@@ -64,11 +65,12 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
     }
 
     /**
-     * Issue for OrderState
+     * Issue fungible tokens from issuer to platform
      */
-    @PostMapping(value = ["order/issueFungible"], produces = ["application/json"])
+    @PostMapping(value = ["issue/fungible"], produces = ["application/json"])
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexIssueFungible(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>> {
+    private fun issueFungible(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>>
+    {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val register = CorexIssueModel(
@@ -82,8 +84,8 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexIssueModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception)
+        {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -95,8 +97,8 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 }

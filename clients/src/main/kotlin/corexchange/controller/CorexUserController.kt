@@ -24,7 +24,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("corex")
-class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
+class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin)
+{
     companion object
     {
         private val logger = LoggerFactory.getLogger(RestController::class.java)
@@ -34,10 +35,10 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
 
 
     /**
-     * Vault for UserState
+     * Get all users on a platform
      */
-    @GetMapping(value = ["/getUserState"], produces = ["application/json"])
-    private fun corexGetUser(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["get/users"], produces = ["application/json"])
+    private fun getAllUsers(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -55,7 +56,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         catch (e: Exception)
         {
             logger.info(e.message)
-            HttpStatus.BAD_REQUEST to "No users found."
+            HttpStatus.BAD_REQUEST to "No corex users found."
         }
         val stat = "status" to status
         val mess = if (status == HttpStatus.CREATED)
@@ -74,11 +75,9 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     /**
      * RegisterFlowAPI for UserState
      */
-    @PostMapping(value = ["user/register"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexRegister(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>> {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-//        plugin.registerModule().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false)
+    @PostMapping(value = ["user/registration"], produces = ["application/json"])
+    private fun registerUser(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>>
+    {
         val (status, result) = try {
             val register = CorexRegisterModel(
                     name = registerModel.name,
@@ -95,8 +94,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to registerModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -108,18 +106,16 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
     /**
-     * MoveFlowAPI for UserState
+     * Move tokens from user to another user
      */
     @PostMapping(value = ["user/move"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun correxMove(@RequestBody corexMoveModel: CorexMoveModel): ResponseEntity<Map<String, Any>> {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+    private fun moveTokens(@RequestBody corexMoveModel: CorexMoveModel): ResponseEntity<Map<String, Any>> {
         val (status, result) = try {
             val register = CorexMoveModel(
                     senderId = corexMoveModel.senderId,
@@ -136,8 +132,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexMoveModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -149,16 +144,15 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
     /**
-     * ShareInfo at UserState
+     * Share info from platform to an issuer
      */
-    @PostMapping(value = ["user/shareInfo"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    @PostMapping(value = ["share/info"], produces = ["application/json"])
     private fun corexShareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
     {
         val (status, result) = try {
@@ -171,8 +165,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to shareInfoModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -184,18 +177,17 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
     /**
-     * TransferToken at UserState
+     * Transfer tokens from platform to user, remove pre-order states and update corex wallet
      */
-    @PostMapping(value = ["user/transferTokens"],produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexTransfer(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
-    {plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+    @PostMapping(value = ["platform/transfer"],produces = ["application/json"])
+    private fun transferTokens(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
+    {
         val (status,result) = try {
             val transfer = CorexTransferTokenModel(
                     transferTokenModel.preOrderId,
@@ -210,8 +202,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to transferTokenModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -223,8 +214,8 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 }

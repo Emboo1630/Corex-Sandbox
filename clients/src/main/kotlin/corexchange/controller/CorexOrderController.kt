@@ -19,8 +19,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("corexOrder")
-class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin) {
+@RequestMapping("corexorder")
+class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin)
+{
     companion object
     {
         private val logger = LoggerFactory.getLogger(RestController::class.java)
@@ -29,10 +30,10 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     private val proxy = rpc.proxy
 
     /**
-     * vault for OrderStates
+     * Get all order states from platform
      */
-    @GetMapping(value = ["order/getOrderStates"], produces = ["application/json"])
-    private fun corexGetOrderStates(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["get/order"], produces = ["application/json"])
+    private fun getOrderStates(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -51,7 +52,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
         catch (e: Exception)
         {
             logger.info(e.message)
-            HttpStatus.BAD_REQUEST to "No users found."
+            HttpStatus.BAD_REQUEST to "No orders found."
         }
         val stat = "status" to status
         val mess = if (status == HttpStatus.CREATED)
@@ -68,12 +69,11 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     }
 
     /**
-     * Order to OrderState
+     * Order fungible tokens from platform to issuer
      */
-    @PostMapping(value = ["order/orderFungible"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexOrderFungible(@RequestBody corexOrderFlowModel: CorexOrderFlowModel): ResponseEntity<Map<String, Any>> {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+    @PostMapping(value = ["order/fungible"], produces = ["application/json"])
+    private fun orderFungibleTokens(@RequestBody corexOrderFlowModel: CorexOrderFlowModel): ResponseEntity<Map<String, Any>>
+    {
         val (status, result) = try {
             val register = CorexOrderFlowModel(
                     amount = corexOrderFlowModel.amount,
@@ -86,8 +86,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexOrderFlowModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -99,17 +98,17 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
 
     /**
-     * Vault for PreOrderState
+     * Get all pre-order states from user
      */
-    @GetMapping(value = ["order/getPreOrder"], produces = ["application/json"])
-    private fun corexGetPreOrderState(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["get/preorder"], produces = ["application/json"])
+    private fun getPreOrderStates(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
@@ -123,11 +122,10 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
                 )
             }
             HttpStatus.CREATED to list
-        }
-        catch (e: Exception)
+        } catch (e: Exception)
         {
             logger.info(e.message)
-            HttpStatus.BAD_REQUEST to "No users found."
+            HttpStatus.BAD_REQUEST to "No pre-orders found."
         }
         val stat = "status" to status
         val mess = if (status == HttpStatus.CREATED)
@@ -144,28 +142,24 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     }
 
     /**
-     * PreOrderFlow at PreOrderState
+     * Pre-order tokens from user to platform
      */
     @PostMapping(value = ["order/preOrder"],produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun corexPreOrder(@RequestBody corexPreOrderRegModel: CorexPreOrderRegModel):ResponseEntity<Map<String,Any>>
-    {plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+    private fun preOrderTokens(@RequestBody corexPreOrderRegModel: CorexPreOrderRegModel):ResponseEntity<Map<String,Any>>
+    {
         val (status,result) = try {
             val preOrder = CorexPreOrderRegModel(
                     amount = corexPreOrderRegModel.amount,
                     currency = corexPreOrderRegModel.currency
-
             )
             val flowReturn = proxy.startFlowDynamic(
                     PreOrderFlow::class.java,
                     preOrder.amount,
                     preOrder.currency
-
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexPreOrderRegModel
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }
         val stat = "status" to status
@@ -177,9 +171,8 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
         {
             "message" to "Failed"
         }
-        val res = "result" to result
 
+        val res = "result" to result
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
-
 }
