@@ -16,8 +16,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
                                 private val userId: String): CorexFunctions()
 {
     @Suspendable
-    override fun call(): SignedTransaction
-    {
+    override fun call(): SignedTransaction {
         progressTracker.currentStep = CREATING
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
@@ -31,9 +30,13 @@ class TransferTokensToUserFlow (private val preOrderId: String,
         // Update Corex Wallet
         val preOrder = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
         val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
-        subFlow(RedeemFungibleTokens(Amount(preOrder.amount, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
+        if (wallet.tokenType.tokenIdentifier == "PHP" || wallet.tokenType.tokenIdentifier == "USD")
+        {
+            val amountWithCurrency = preOrder.amount * 100
+            subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
+        }
 
-        // Remove Order
+        // Remove Pre-Order from user -> platform
         return subFlow(CorexRemovePreOrderFlow(preOrderId))
     }
 
@@ -45,7 +48,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
         val user = inputUserRefUsingLinearID(stringToLinearID(userId)).state.data
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == preOrder.currency && x.token.tokenIdentifier == wallet.tokenType.tokenIdentifier}
         val newUserWallet= user.wallet.minus(filteredListOfWallet[0])
-        val newQuantity = filteredListOfWallet[0].quantity + preOrder.amount
+        val newQuantity = filteredListOfWallet[0].quantity + (preOrder.amount * 100)
         val newElement= Amount(newQuantity, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits))
         return newUserWallet.plus(newElement).toMutableList()
     }
