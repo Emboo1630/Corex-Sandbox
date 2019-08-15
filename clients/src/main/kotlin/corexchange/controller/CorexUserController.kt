@@ -16,6 +16,8 @@ import corexchange.userflows.UserRegisterFlow
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
+import net.corda.core.contracts.StateRef
+import net.corda.core.crypto.SecureHash
 import net.corda.core.messaging.vaultQueryBy
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

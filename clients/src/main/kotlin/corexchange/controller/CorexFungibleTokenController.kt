@@ -11,6 +11,8 @@ import corexchange.states.OrderState
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
+import net.corda.core.contracts.StateRef
+import net.corda.core.crypto.SecureHash
 import net.corda.core.messaging.vaultQueryBy
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -38,10 +40,12 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
         val (status, result) = try {
             val infoStateRef = proxy.vaultQueryBy<FungibleToken>().states
             val infoStates = infoStateRef.map { it.state.data }
+            val infoRef = infoStateRef.map { it.ref.txhash }.single()
             val list = infoStates.map {
                 CorexFungibleTokenModel(
                         amount = it.amount.toString(),
-                        holder = it.holder.toString()
+                        holder = it.holder.toString(),
+                        hash = infoRef.toString()
                 )
             }
             HttpStatus.CREATED to list

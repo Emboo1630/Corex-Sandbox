@@ -50,11 +50,11 @@ task runTemplateClient(type: JavaExec) {
 task CorexPlatformServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'corexchange.webserver.ServerKt'
-    args '--server.port=10050', '--config.rpc.host=localhost', '--config.rpc.port=10006', '--config.rpc.username=user1', '--config.rpc.password=test'
+    args '--server.port=9090', '--config.rpc.host=localhost', '--config.rpc.port=10006', '--config.rpc.username=user1', '--config.rpc.password=test'
 }
 
 task IssuerPHP(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'corexchange.webserver.ServerKt'
-    args '--server.port=10051', '--config.rpc.host=localhost', '--config.rpc.port=10009', '--config.rpc.username=user1', '--config.rpc.password=test'
+    args '--server.port=9091', '--config.rpc.host=localhost', '--config.rpc.port=10009', '--config.rpc.username=user1', '--config.rpc.password=test'
 }
