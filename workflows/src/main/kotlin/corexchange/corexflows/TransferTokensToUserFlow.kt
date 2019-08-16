@@ -37,7 +37,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
         }
 
         // Remove Pre-Order from user -> platform
-        return subFlow(CorexRemovePreOrderFlow(preOrderId))
+        return subFlow(CorexRemoveReserveTokensFlow(preOrderId))
     }
 
     // Wallet of user

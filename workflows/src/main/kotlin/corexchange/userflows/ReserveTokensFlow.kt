@@ -11,8 +11,8 @@ import corexchange.states.PreOrderState
 
 @InitiatingFlow
 @StartableByRPC
-class PreOrderFlow (private val amount: Long,
-                    private val currency: String): UserFunctions()
+class ReserveTokensFlow (private val amount: Long,
+                         private val currency: String): UserFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
