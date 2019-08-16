@@ -20,6 +20,7 @@ class OrderContract : Contract
     interface Commands : CommandData
     {
         class Order : TypeOnlyCommandData(), Commands
+        class Verify : TypeOnlyCommandData(), Commands
         class Remove : TypeOnlyCommandData(), Commands
     }
 }

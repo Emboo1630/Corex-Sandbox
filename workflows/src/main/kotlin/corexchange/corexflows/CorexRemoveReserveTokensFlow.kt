@@ -8,7 +8,7 @@ import net.corda.core.contracts.Command
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.transactions.*
 
-class CorexRemovePreOrderFlow (private val preOrderId: String): CorexFunctions()
+class CorexRemoveReserveTokensFlow (private val preOrderId: String): CorexFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction

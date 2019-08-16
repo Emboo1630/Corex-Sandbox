@@ -53,6 +53,7 @@ class CorexOrderFlow (private val amount: Long,
                     amount = amount,
                     currency = currency,
                     issuer = stringToParty("IssuerPHP"),
+                    status = "processing",
                     linearId = UniqueIdentifier(),
                     participants = listOf(ourIdentity, stringToParty("IssuerPHP"))
             )
@@ -62,6 +63,7 @@ class CorexOrderFlow (private val amount: Long,
             return OrderState(
                     amount = amount,
                     currency = currency,
+                    status = "processing",
                     issuer = stringToParty("IssuerUSD"),
                     linearId = UniqueIdentifier(),
                     participants = listOf(ourIdentity, stringToParty("IssuerUSD"))

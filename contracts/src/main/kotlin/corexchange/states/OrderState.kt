@@ -8,7 +8,8 @@ import net.corda.core.identity.Party
 
 @BelongsToContract(OrderContract::class)
 data class OrderState (val amount: Long,
-                      val currency: String,
-                      val issuer: Party,
-                      override val linearId: UniqueIdentifier,
-                      override val participants: List<Party>): LinearState
+                       val currency: String,
+                       val issuer: Party,
+                       val status: String,
+                       override val linearId: UniqueIdentifier,
+                       override val participants: List<Party>): LinearState
