@@ -22,7 +22,7 @@ data class CorexRegisterModel @JsonCreator constructor(
         val fractionDigits: MutableList<Int>
 )
 
-data class CorexMoveModel @JsonCreator constructor(
+data class CorexMoveTokensFromUserToUserModel @JsonCreator constructor(
          val senderId: String,
          val receiverId: String,
          val amount: Long,

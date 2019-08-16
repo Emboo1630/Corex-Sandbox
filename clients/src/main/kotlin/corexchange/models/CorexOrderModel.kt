@@ -11,6 +11,7 @@ data class CorexOrderModel(
         val amount: Long,
         val currency: String,
         val issuer: String,
+        val status: String,
         val linearId: String
 )
 
@@ -19,15 +20,18 @@ data class CorexOrderFlowModel @JsonCreator constructor(
         val currency: String
 )
 
-
-data class CorexPreOrderModel @JsonCreator constructor(
+data class CorexReserveModel @JsonCreator constructor(
         val amount: Long,
         val currency: String,
         val linearId: String
 )
 
-data class CorexPreOrderRegModel @JsonCreator constructor(
+data class CorexReserveTokensModel @JsonCreator constructor(
         val amount: Long,
         val currency: String
+)
+
+data class IssuerVerifyOrderModel @JsonCreator constructor(
+        val linearId: String
 )
 

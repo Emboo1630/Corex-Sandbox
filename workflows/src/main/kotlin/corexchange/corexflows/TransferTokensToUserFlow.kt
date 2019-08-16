@@ -17,6 +17,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
 {
     @Suspendable
     override fun call(): SignedTransaction {
+        // Transfer tokens from platform to user
         progressTracker.currentStep = CREATING
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
@@ -36,7 +37,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
             subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
         }
 
-        // Remove Pre-Order from user -> platform
+        // Remove Reserve from user -> platform
         return subFlow(CorexRemoveReserveTokensFlow(preOrderId))
     }
 

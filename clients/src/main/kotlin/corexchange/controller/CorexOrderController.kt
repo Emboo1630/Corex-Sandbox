@@ -1,14 +1,12 @@
 package corexchange.controller
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import corexchange.issuerflows.CorexOrderFlow
-import corexchange.issuerflows.IssueTokensFlow
+import corexchange.issuerflows.VerifyOrderFlow
 import corexchange.models.*
 import corexchange.states.OrderState
-import corexchange.states.PreOrderState
-import corexchange.userflows.PreOrderFlow
+import corexchange.states.ReserveOrderState
+import corexchange.userflows.ReserveTokensFlow
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
@@ -43,6 +41,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
                 CorexOrderModel(
                         amount = it.amount,
                         currency = it.currency,
+                        status = it.status,
                         issuer = it.issuer.toString(),
                         linearId = it.linearId.toString()
                 )
@@ -103,19 +102,52 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
         return ResponseEntity.status(status).body(mapOf(stat, mess, res))
     }
 
+    /**
+     * Verify order of platform to issuer
+     */
+    @PostMapping(value = ["verify/order"], produces = ["application/json"])
+    private fun verifyOrder(@RequestBody issuerVerifyOrderModel: IssuerVerifyOrderModel): ResponseEntity<Map<String, Any>>
+    {
+        val (status, result) = try {
+            val verify = IssuerVerifyOrderModel(
+                    linearId = issuerVerifyOrderModel.linearId
+            )
+            val flowReturn = proxy.startFlowDynamic(
+                    VerifyOrderFlow::class.java,
+                    verify.linearId
+            )
+            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+            HttpStatus.CREATED to issuerVerifyOrderModel
+        } catch (e: Exception)
+        {
+            HttpStatus.BAD_REQUEST to e
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+
+        val res = "result" to result
+        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+    }
 
     /**
-     * Get all pre-order states from user
+     * Get all reserved tokens state from user
      */
-    @GetMapping(value = ["get/preorder"], produces = ["application/json"])
-    private fun getPreOrderStates(): ResponseEntity<Map<String, Any>>
+    @GetMapping(value = ["get/reserve"], produces = ["application/json"])
+    private fun getReserveTokens(): ResponseEntity<Map<String, Any>>
     {
         plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
-            val infoStateRef = proxy.vaultQueryBy<PreOrderState>().states
+            val infoStateRef = proxy.vaultQueryBy<ReserveOrderState>().states
             val infoStates = infoStateRef.map { it.state.data }
             val list = infoStates.map {
-                CorexPreOrderModel(
+                CorexReserveModel(
                         amount = it.amount,
                         currency = it.currency,
                         linearId = it.linearId.toString()
@@ -142,23 +174,23 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     }
 
     /**
-     * Pre-order tokens from user to platform
+     * Reserve tokens from user to platform
      */
     @PostMapping(value = ["order/preOrder"],produces = ["application/json"])
-    private fun preOrderTokens(@RequestBody corexPreOrderRegModel: CorexPreOrderRegModel):ResponseEntity<Map<String,Any>>
+    private fun reserveTokens(@RequestBody corexReserveTokensModel: CorexReserveTokensModel):ResponseEntity<Map<String,Any>>
     {
         val (status,result) = try {
-            val preOrder = CorexPreOrderRegModel(
-                    amount = corexPreOrderRegModel.amount,
-                    currency = corexPreOrderRegModel.currency
+            val preOrder = CorexReserveTokensModel(
+                    amount = corexReserveTokensModel.amount,
+                    currency = corexReserveTokensModel.currency
             )
             val flowReturn = proxy.startFlowDynamic(
-                    PreOrderFlow::class.java,
+                    ReserveTokensFlow::class.java,
                     preOrder.amount,
                     preOrder.currency
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
-            HttpStatus.CREATED to corexPreOrderRegModel
+            HttpStatus.CREATED to corexReserveTokensModel
         } catch (e: Exception) {
             HttpStatus.BAD_REQUEST to e
         }

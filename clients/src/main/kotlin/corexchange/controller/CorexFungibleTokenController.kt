@@ -1,18 +1,13 @@
 package corexchange.controller
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
-import corexchange.issuerflows.IssueTokensFlow
-import corexchange.models.CorexFungibleTokenModel
-import corexchange.models.CorexIssueModel
-import corexchange.models.CorexOrderModel
-import corexchange.states.OrderState
+import corexchange.issuerflows.MoveTokensToPlatformFlow
+import corexchange.issuerflows.SelfIssueTokensFlow
+import corexchange.models.*
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
-import net.corda.core.contracts.StateRef
-import net.corda.core.crypto.SecureHash
 import net.corda.core.messaging.vaultQueryBy
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -69,25 +64,59 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
     }
 
     /**
-     * Issue fungible tokens from issuer to platform
+     * Self Issue Tokens on a Issuer Node
      */
-    @PostMapping(value = ["issue/fungible"], produces = ["application/json"])
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private fun issueFungible(@RequestBody corexIssueModel: CorexIssueModel): ResponseEntity<Map<String, Any>>
+    @PostMapping(value = ["selfissue/fungible"], produces = ["application/json"])
+    private fun selfIssueFungibleTokens(@RequestBody corexSelfIssueModel: CorexSelfIssueModel): ResponseEntity<Map<String, Any>>
     {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
-            val register = CorexIssueModel(
-                    recipient = corexIssueModel.recipient,
-                    orderId = corexIssueModel.orderId
+            val selfIssue = CorexSelfIssueModel(
+                    amount = corexSelfIssueModel.amount,
+                    currency = corexSelfIssueModel.currency
             )
             val flowReturn = proxy.startFlowDynamic(
-                    IssueTokensFlow::class.java,
+                    SelfIssueTokensFlow::class.java,
+                    selfIssue.amount,
+                    selfIssue.currency
+            )
+            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+            HttpStatus.CREATED to corexSelfIssueModel
+        } catch (e: Exception)
+        {
+            HttpStatus.BAD_REQUEST to e
+        }
+        val stat = "status" to status
+        val mess = if (status == HttpStatus.CREATED)
+        {
+            "message" to "Successful"
+        }
+        else
+        {
+            "message" to "Failed"
+        }
+
+        val res = "result" to result
+        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+    }
+
+    /**
+     * Move fungible tokens from issuer to platform
+     */
+    @PostMapping(value = ["move/fungible"], produces = ["application/json"])
+    private fun moveFungibleTokens(@RequestBody corexMoveModel: CorexMoveFungibleTokensModel): ResponseEntity<Map<String, Any>>
+    {
+        val (status, result) = try {
+            val register = CorexMoveFungibleTokensModel(
+                    recipient = corexMoveModel.recipient,
+                    orderId = corexMoveModel.orderId
+            )
+            val flowReturn = proxy.startFlowDynamic(
+                    MoveTokensToPlatformFlow::class.java,
                     register.recipient,
                     register.orderId
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
-            HttpStatus.CREATED to corexIssueModel
+            HttpStatus.CREATED to corexMoveModel
         } catch (e: Exception)
         {
             HttpStatus.BAD_REQUEST to e

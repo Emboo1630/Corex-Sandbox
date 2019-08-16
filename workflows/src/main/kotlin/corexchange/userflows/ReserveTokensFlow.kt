@@ -6,8 +6,8 @@ import net.corda.core.flows.*
 import net.corda.core.transactions.*
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
-import corexchange.contracts.PreOrderContract
-import corexchange.states.PreOrderState
+import corexchange.contracts.ReserveOrderContract
+import corexchange.states.ReserveOrderState
 
 @InitiatingFlow
 @StartableByRPC
@@ -26,9 +26,9 @@ class ReserveTokensFlow (private val amount: Long,
         return subFlow(FinalityFlow(signedTransaction, listOf()))
     }
 
-    private fun outState(): PreOrderState
+    private fun outState(): ReserveOrderState
     {
-        return PreOrderState(
+        return ReserveOrderState(
                 amount = amount,
                 currency = currency,
                 linearId = UniqueIdentifier(),
@@ -37,8 +37,8 @@ class ReserveTokensFlow (private val amount: Long,
     }
 
     private fun preOrder() = TransactionBuilder(notary = getPreferredNotary(serviceHub)).apply {
-        val cmd = Command(PreOrderContract.Commands.PreOrder(), listOf(ourIdentity.owningKey))
-        addOutputState(outState(), PreOrderContract.PREORDER_ID)
+        val cmd = Command(ReserveOrderContract.Commands.PreOrder(), listOf(ourIdentity.owningKey))
+        addOutputState(outState(), ReserveOrderContract.PREORDER_ID)
         addCommand(cmd)
     }
 }

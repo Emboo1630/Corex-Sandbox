@@ -8,7 +8,13 @@ data class CorexFungibleTokenModel(
         val hash: String
 )
 
-data class CorexIssueModel @JsonCreator constructor(
+data class CorexMoveFungibleTokensModel @JsonCreator constructor(
         val recipient: String,
         val orderId: String
 )
+
+data class CorexSelfIssueModel @JsonCreator constructor(
+        val amount: Long,
+        val currency: String
+)
+

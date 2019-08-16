@@ -1,23 +1,15 @@
 package corexchange.controller
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import corexchange.corexflows.ShareInfoFlow
 import corexchange.corexflows.TransferTokensToUserFlow
 import corexchange.models.*
-import corexchange.states.PreOrderState
 import corexchange.states.UserState
-import corexchange.userflows.MoveTokensFlow
-import corexchange.userflows.PreOrderFlow
+import corexchange.userflows.MoveTokensFromUserToUserFlow
 import corexchange.userflows.UserRegisterFlow
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
-import net.corda.core.contracts.StateRef
-import net.corda.core.crypto.SecureHash
 import net.corda.core.messaging.vaultQueryBy
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -75,7 +67,7 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     }
 
     /**
-     * RegisterFlowAPI for UserState
+     * Registration of user with wallet
      */
     @PostMapping(value = ["user/registration"], produces = ["application/json"])
     private fun registerUser(@RequestBody registerModel: CorexRegisterModel): ResponseEntity<Map<String, Any>>
@@ -117,16 +109,16 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
      * Move tokens from user to another user
      */
     @PostMapping(value = ["user/move"], produces = ["application/json"])
-    private fun moveTokens(@RequestBody corexMoveModel: CorexMoveModel): ResponseEntity<Map<String, Any>> {
+    private fun moveTokens(@RequestBody corexMoveModel: CorexMoveTokensFromUserToUserModel): ResponseEntity<Map<String, Any>> {
         val (status, result) = try {
-            val register = CorexMoveModel(
+            val register = CorexMoveTokensFromUserToUserModel(
                     senderId = corexMoveModel.senderId,
                     receiverId = corexMoveModel.receiverId,
                     amount = corexMoveModel.amount,
                     currency = corexMoveModel.currency
             )
             val flowReturn = proxy.startFlowDynamic(
-                    MoveTokensFlow::class.java,
+                    MoveTokensFromUserToUserFlow::class.java,
                     register.senderId,
                     register.receiverId,
                     register.amount,

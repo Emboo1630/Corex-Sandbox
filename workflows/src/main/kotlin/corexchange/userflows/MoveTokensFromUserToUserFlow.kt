@@ -11,10 +11,10 @@ import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 
 @StartableByRPC
-class MoveTokensFlow (private val senderId: String,
-                      private val receiverId: String,
-                      private val amount: Long,
-                      private val currency: String): UserFunctions()
+class MoveTokensFromUserToUserFlow (private val senderId: String,
+                                    private val receiverId: String,
+                                    private val amount: Long,
+                                    private val currency: String): UserFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
