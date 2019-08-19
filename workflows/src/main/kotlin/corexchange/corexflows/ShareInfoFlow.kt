@@ -19,6 +19,10 @@ class ShareInfoFlow (private val recipient: String): CorexFunctions()
     @Suspendable
     override fun call(): SignedTransaction
     {
+        /**
+         * Minor bug on sharing info when a state in UserState
+         * is used in another transaction, it will throw a FlowException.
+         */
         progressTracker.currentStep = CREATING
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING

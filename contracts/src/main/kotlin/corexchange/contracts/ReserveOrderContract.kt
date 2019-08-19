@@ -9,7 +9,7 @@ class ReserveOrderContract : Contract
 {
     companion object
     {
-        const val PREORDER_ID = "corexchange.contracts.PreOrderContract"
+        const val PREORDER_ID = "corexchange.contracts.ReserveOrderContract"
     }
 
     override fun verify(tx: LedgerTransaction)
