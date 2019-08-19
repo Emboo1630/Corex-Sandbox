@@ -28,7 +28,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
         subFlow(FinalityFlow(transactionSignedByPartiesUser, listOf()))
 
         // Update Corex Wallet
-        val preOrder = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
+        val preOrder = inputReserveOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
         val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
         if (wallet.tokenType.tokenIdentifier == "PHP" || wallet.tokenType.tokenIdentifier == "USD")
         {
@@ -43,7 +43,7 @@ class TransferTokensToUserFlow (private val preOrderId: String,
     // Wallet of user
     private fun newWallet(): MutableList<Amount<TokenType>>
     {
-        val preOrder = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
+        val preOrder = inputReserveOrderRefUsingLinearID(stringToLinearID(preOrderId)).state.data
         val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
         val user = inputUserRefUsingLinearID(stringToLinearID(userId)).state.data
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == preOrder.currency && x.token.tokenIdentifier == wallet.tokenType.tokenIdentifier}

@@ -5,7 +5,7 @@ import net.corda.core.contracts.Contract
 import net.corda.core.contracts.TypeOnlyCommandData
 import net.corda.core.transactions.LedgerTransaction
 
-class PreOrderContract : Contract
+class ReserveOrderContract : Contract
 {
     companion object
     {
