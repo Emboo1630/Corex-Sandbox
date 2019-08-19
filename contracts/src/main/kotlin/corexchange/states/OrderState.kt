@@ -13,3 +13,6 @@ data class OrderState (val amount: Long,
                        val status: String,
                        override val linearId: UniqueIdentifier,
                        override val participants: List<Party>): LinearState
+{
+    fun verify(): OrderState = copy(status = "verified")
+}
