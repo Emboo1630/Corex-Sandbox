@@ -150,6 +150,7 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
                 CorexReserveModel(
                         amount = it.amount,
                         currency = it.currency,
+                        userId = it.owner.toString(),
                         linearId = it.linearId.toString()
                 )
             }
@@ -176,18 +177,20 @@ class CorexOrderController(rpc: NodeRPCConnection, private val flowHandlerComple
     /**
      * Reserve tokens from user to platform
      */
-    @PostMapping(value = ["order/preOrder"],produces = ["application/json"])
+    @PostMapping(value = ["order/reserve"],produces = ["application/json"])
     private fun reserveTokens(@RequestBody corexReserveTokensModel: CorexReserveTokensModel):ResponseEntity<Map<String,Any>>
     {
         val (status,result) = try {
-            val preOrder = CorexReserveTokensModel(
+            val reserve = CorexReserveTokensModel(
                     amount = corexReserveTokensModel.amount,
-                    currency = corexReserveTokensModel.currency
+                    currency = corexReserveTokensModel.currency,
+                    userId = corexReserveTokensModel.userId
             )
             val flowReturn = proxy.startFlowDynamic(
                     ReserveTokensFlow::class.java,
-                    preOrder.amount,
-                    preOrder.currency
+                    reserve.amount,
+                    reserve.currency,
+                    reserve.userId
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to corexReserveTokensModel

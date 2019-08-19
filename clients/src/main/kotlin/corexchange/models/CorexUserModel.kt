@@ -31,8 +31,7 @@ data class CorexMoveTokensFromUserToUserModel @JsonCreator constructor(
 
 data class CorexTransferTokenModel @JsonCreator constructor(
         val preOrderId: String,
-        val walletRef: String,
-        val userId: String
+        val walletRef: String
 )
 
 data class CorexShareInfoModel @JsonCreator constructor(

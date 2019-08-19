@@ -8,7 +8,7 @@ import net.corda.core.contracts.Command
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.transactions.*
 
-class CorexRemoveReserveTokensFlow (private val preOrderId: String): CorexFunctions()
+class CorexRemoveReserveTokensFlow (private val reserveId: String): CorexFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
@@ -22,7 +22,7 @@ class CorexRemoveReserveTokensFlow (private val preOrderId: String): CorexFuncti
         return subFlow(FinalityFlow(signedTransaction, listOf()))
     }
     private fun removePreOrder() = TransactionBuilder(notary = getPreferredNotary(serviceHub)).apply {
-        val input = inputPreOrderRefUsingLinearID(stringToLinearID(preOrderId))
+        val input = inputReserveOrderRefUsingLinearID(stringToLinearID(reserveId))
         val cmd = Command(ReserveOrderContract.Commands.RemovePreOrder(), listOf(ourIdentity.owningKey))
         addInputState(input)
         addCommand(cmd)

@@ -109,7 +109,8 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
      * Move tokens from user to another user
      */
     @PostMapping(value = ["user/move"], produces = ["application/json"])
-    private fun moveTokens(@RequestBody corexMoveModel: CorexMoveTokensFromUserToUserModel): ResponseEntity<Map<String, Any>> {
+    private fun moveTokens(@RequestBody corexMoveModel: CorexMoveTokensFromUserToUserModel): ResponseEntity<Map<String, Any>>
+    {
         val (status, result) = try {
             val register = CorexMoveTokensFromUserToUserModel(
                     senderId = corexMoveModel.senderId,
@@ -182,17 +183,16 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     @PostMapping(value = ["platform/transfer"],produces = ["application/json"])
     private fun transferTokens(@RequestBody transferTokenModel: CorexTransferTokenModel):ResponseEntity<Map<String,Any>>
     {
+        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status,result) = try {
             val transfer = CorexTransferTokenModel(
                     transferTokenModel.preOrderId,
-                    transferTokenModel.walletRef,
-                    transferTokenModel.userId
+                    transferTokenModel.walletRef
             )
             val flowReturn = proxy.startFlowDynamic(
                     TransferTokensToUserFlow::class.java,
                     transfer.preOrderId,
-                    transfer.walletRef,
-                    transfer.userId
+                    transfer.walletRef
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to transferTokenModel

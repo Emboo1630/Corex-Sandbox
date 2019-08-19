@@ -13,7 +13,7 @@ import java.util.ArrayList
 
 @BelongsToContract(UserContract::class)
 data class UserState (val name: String,
-                     var wallet: MutableList<Amount<TokenType>>,
-                     override val participants: List<Party>,
-                     override val linearId: UniqueIdentifier): LinearState
+                      var wallet: MutableList<Amount<TokenType>>,
+                      override val participants: List<Party>,
+                      override val linearId: UniqueIdentifier): LinearState
 

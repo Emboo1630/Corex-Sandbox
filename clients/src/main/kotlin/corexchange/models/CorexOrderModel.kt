@@ -23,12 +23,14 @@ data class CorexOrderFlowModel @JsonCreator constructor(
 data class CorexReserveModel @JsonCreator constructor(
         val amount: Long,
         val currency: String,
+        val userId: String,
         val linearId: String
 )
 
 data class CorexReserveTokensModel @JsonCreator constructor(
         val amount: Long,
-        val currency: String
+        val currency: String,
+        val userId: String
 )
 
 data class IssuerVerifyOrderModel @JsonCreator constructor(
