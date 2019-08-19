@@ -36,9 +36,9 @@ abstract class CorexFunctions : FlowLogic<SignedTransaction>()
         return serviceHub.vaultService.queryBy<UserState>(criteria = criteria).states.single()
     }
 
-    fun inputPreOrderRefUsingLinearID(id: UniqueIdentifier): StateAndRef<PreOrderState> {
+    fun inputPreOrderRefUsingLinearID(id: UniqueIdentifier): StateAndRef<ReserveOrderState> {
         val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(id))
-        return serviceHub.vaultService.queryBy<PreOrderState>(criteria = criteria).states.single()
+        return serviceHub.vaultService.queryBy<ReserveOrderState>(criteria = criteria).states.single()
     }
 
     fun stringToStateRef(stateRef: String): StateRef
