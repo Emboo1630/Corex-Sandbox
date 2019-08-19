@@ -19,12 +19,6 @@ class ShareInfoFlow (private val recipient: String): CorexFunctions()
     @Suspendable
     override fun call(): SignedTransaction
     {
-        /**
-         * Share info should be used before any transactions would be commited.
-         * If not, a flow exception will trigger because of unsupported feauture of corda that can handle
-         * different notaries in transactions with reference states.
-         */
-
         progressTracker.currentStep = CREATING
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING

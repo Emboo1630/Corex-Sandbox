@@ -5,11 +5,11 @@ import net.corda.core.contracts.Contract
 import net.corda.core.contracts.TypeOnlyCommandData
 import net.corda.core.transactions.LedgerTransaction
 
-class ReserveOrderContract : Contract
+class SampleContract : Contract
 {
     companion object
     {
-        const val PREORDER_ID = "corexchange.contracts.ReserveOrderContract"
+        const val sample_id= "corexchange.contracts.SampleContract"
     }
 
     override fun verify(tx: LedgerTransaction)
@@ -19,7 +19,6 @@ class ReserveOrderContract : Contract
 
     interface Commands : CommandData
     {
-        class PreOrder : TypeOnlyCommandData(), Commands
-        class RemovePreOrder : TypeOnlyCommandData(), Commands
+        class SampleCommand : TypeOnlyCommandData(), Commands
     }
 }

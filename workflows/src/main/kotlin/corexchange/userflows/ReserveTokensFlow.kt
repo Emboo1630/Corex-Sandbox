@@ -12,7 +12,8 @@ import corexchange.states.ReserveOrderState
 @InitiatingFlow
 @StartableByRPC
 class ReserveTokensFlow (private val amount: Long,
-                         private val currency: String): UserFunctions()
+                         private val currency: String,
+                         private val userId: String): UserFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
@@ -31,6 +32,7 @@ class ReserveTokensFlow (private val amount: Long,
         return ReserveOrderState(
                 amount = amount,
                 currency = currency,
+                owner = stringToLinearID(userId),
                 linearId = UniqueIdentifier(),
                 participants = listOf(ourIdentity)
         )

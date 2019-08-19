@@ -53,7 +53,7 @@ class MoveTokensFromUserToUserFlow (private val senderId: String,
         val stateWallet = state.wallet.find { x -> x.token.tokenIdentifier == currency }
                 ?: throw IllegalArgumentException("No currency found")
         val wallet = state.wallet.filter { stateWallet.token.tokenIdentifier == currency }
-        val totalAmount = stateWallet.quantity - amount
+        val totalAmount = stateWallet.quantity - (amount * 100)
         val token = Amount(totalAmount, FiatCurrency.getInstance(stateWallet.token.tokenIdentifier))
         val minusWallet = wallet.minus(stateWallet).toMutableList()
         return minusWallet.plus(token).toMutableList()
@@ -65,7 +65,7 @@ class MoveTokensFromUserToUserFlow (private val senderId: String,
         val stateWallet = state.wallet.find { x -> x.token.tokenIdentifier == currency }
                 ?: throw IllegalArgumentException("No currency found")
         val wallet = state.wallet.filter { stateWallet.token.tokenIdentifier == currency }
-        val totalAmount = stateWallet.quantity + amount
+        val totalAmount = stateWallet.quantity + (amount * 100)
         val token = Amount(totalAmount, FiatCurrency.getInstance(stateWallet.token.tokenIdentifier))
         val minusWallet = wallet.minus(stateWallet)
         return minusWallet.plus(token).toMutableList()

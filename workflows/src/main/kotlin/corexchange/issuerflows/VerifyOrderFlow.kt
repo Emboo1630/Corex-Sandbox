@@ -35,14 +35,7 @@ class VerifyOrderFlow (private val linearId: String): IssuerFunctions()
     private fun outState(): OrderState
     {
         val input = inputOrderRefUsingLinearID(stringToLinearID(linearId)).state.data
-        return OrderState(
-                amount = input.amount,
-                currency = input.currency,
-                issuer = input.issuer,
-                status = "verified",
-                linearId = input.linearId,
-                participants = input.participants
-        )
+        return input.verify()
     }
 
     private fun verifyOrder() = TransactionBuilder(notary = getPreferredNotary(serviceHub)).apply {
