@@ -3,7 +3,9 @@ package corexchange.userflows
 import co.paralleluniverse.fibers.Suspendable
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.workflows.flows.rpc.RedeemFungibleTokens
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import corexchange.*
 import corexchange.contracts.UserContract
@@ -24,11 +26,23 @@ import java.io.InputStreamReader
 @StartableByRPC
 class ExchangeFlow (private val amount: Long,
                     private val currency: String,
-                    private val userId: String): UserFunctions()
+                    private val userId: String,
+                    private val walletRef: String): UserFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
     {
+        // Update Corex Wallet
+        val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
+        if (wallet.tokenType.tokenIdentifier == "PHP" || wallet.tokenType.tokenIdentifier == "USD")
+        {
+            val amountWithCurrency = amount * 100
+            subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
+        }
+
+        /**
+         * Exchange currency on the user wallet
+         */
         progressTracker.currentStep = CREATING
         progressTracker.currentStep = VERIFYING
         progressTracker.currentStep = SIGNING
@@ -62,7 +76,6 @@ class ExchangeFlow (private val amount: Long,
             val gson = GsonBuilder().create()
             val jsonWholeObject = gson.fromJson(stringBuff.toString(), JsonObject::class.java)
             val rates = jsonWholeObject.get("rates").asJsonObject
-            val usd = rates.get("USD").asLong
             val php = rates.get("PHP").asLong
 
             // Currency to be filtered
