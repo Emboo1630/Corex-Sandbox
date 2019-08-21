@@ -16,8 +16,7 @@ import corexchange.states.UserState
 @StartableByRPC
 class UserRegisterFlow (private val name: String,
                         private val amount: MutableList<Long>,
-                        private val currency: MutableList<String>,
-                        private val fractionDigits: MutableList<Int>): UserFunctions()
+                        private val currency: MutableList<String>): UserFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
@@ -51,6 +50,7 @@ class UserRegisterFlow (private val name: String,
         {
             val token = FiatCurrency.getInstance(currency[index])
             wallet.add(index,value of token)
+            // TODO - if currency != usd and php, give user-define token identifier with matching fraction digits
         }
         return wallet
     }
