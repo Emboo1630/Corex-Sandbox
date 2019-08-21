@@ -28,8 +28,10 @@ class TransferTokensToUserFlow (private val reserveId: String,
         subFlow(FinalityFlow(transactionSignedByPartiesUser, listOf()))
 
         // Update Corex Wallet
+
         val reserve = inputReserveOrderRefUsingLinearID(stringToLinearID(reserveId)).state.data
         val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
+
         if (wallet.tokenType.tokenIdentifier == "PHP" || wallet.tokenType.tokenIdentifier == "USD")
         {
             val amountWithCurrency = reserve.amount * 100

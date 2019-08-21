@@ -1,8 +1,6 @@
 package corexchange.userflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
@@ -14,19 +12,13 @@ import com.r3.corda.lib.tokens.workflows.flows.rpc.RedeemFungibleTokens
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import corexchange.*
 import corexchange.contracts.UserContract
-import corexchange.states.UserState
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Command
-import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.CollectSignaturesFlow
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClientBuilder
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 @StartableByRPC
 class ExchangeFlow (private val amount: Long,
@@ -45,18 +37,18 @@ class ExchangeFlow (private val amount: Long,
             val tokens = FiatCurrency.getInstance(currency)
             subFlow(IssueTokens(listOf(amount of tokens issuedBy ourIdentity heldBy ourIdentity)))
             //subFlow merge after issuing tokens
-
+            mergeFungibleTokens(currency)
             if (currency == "USD")
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
-                val amountWithCurrency = (amount * returnExternalPhp()) * 100
-                subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)), walletReduced.issuer))
+                val amountWithCurrency = (amount * returnExternalPhp().toDouble()).times(100)
+                subFlow(RedeemFungibleTokens(Amount(amountWithCurrency.toLong(), TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)), walletReduced.issuer))
             }
             else if (currency == "PHP")
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
-                val amountWithCurrency = (amount / returnExternalPhp()) * 100
-                subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)), walletReduced.issuer))
+                val amountWithCurrency = (amount / returnExternalPhp().toDouble()).times(100)
+                subFlow(RedeemFungibleTokens(Amount(amountWithCurrency.toLong(), TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)), walletReduced.issuer))
             }
         }
 
@@ -82,7 +74,7 @@ class ExchangeFlow (private val amount: Long,
         // Currency to be filtered
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == currency }
         val newUserWallet = user.wallet.minus(filteredListOfWallet[0])
-        val newQuantity = filteredListOfWallet[0].quantity - (amount * 100)
+        val newQuantity = filteredListOfWallet[0].quantity - (amount.times(100))
         val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
         val updatedUserWallet = newUserWallet.plus(newElement).toMutableList()
 
@@ -91,11 +83,11 @@ class ExchangeFlow (private val amount: Long,
         val exchangeUserWallet = updatedUserWallet.minus(exchangeFilteredWallet[0])
         return if (currency == "USD")
         {
-            val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount * returnExternalPhp()) * 100)
+            val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount * returnExternalPhp()).times(100))
             val exchangeElement = Amount(exchangeQuantity, TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
             exchangeUserWallet.plus(exchangeElement).toMutableList()
         } else {
-            val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount / returnExternalPhp()) * 100)
+            val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount / returnExternalPhp()).times(100))
             val exchangeElement = Amount(exchangeQuantity, TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
             exchangeUserWallet.plus(exchangeElement).toMutableList()
         }
