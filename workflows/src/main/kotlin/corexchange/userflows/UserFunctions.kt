@@ -32,12 +32,12 @@ abstract class UserFunctions : FlowLogic<SignedTransaction>() {
             CREATING, VERIFYING, SIGNING, NOTARIZING, FINALIZING
     )
 
-    fun fungibleTokenState(): List<StateAndRef<FungibleToken>> {
+    private fun fungibleTokenState(): List<StateAndRef<FungibleToken>> {
         val query = QueryCriteria.VaultQueryCriteria(status = Vault.StateStatus.UNCONSUMED)
         return serviceHub.vaultService.queryBy<FungibleToken>(query).states
     }
 
-    fun mergeFungibleTokens(currency:String):SignedTransaction {
+    fun mergeFungibleTokens(currency: String): SignedTransaction {
         val input = fungibleTokenState().filter { it.state.data.tokenType.tokenIdentifier == currency }
         var totalAmount: Long = 0
         for (states in input) {
@@ -81,7 +81,7 @@ abstract class UserFunctions : FlowLogic<SignedTransaction>() {
         return StateRef(txhash = SecureHash.parse(stateRef), index = 0)
     }
 
-    fun returnExternalPhp(): Long {
+    fun returnExternalPhp(): Double {
         // External Data
         val httpclient = HttpClientBuilder.create().build()
         val request = HttpGet("https://api.exchangeratesapi.io/latest?base=USD&symbols=PHP,USD")
@@ -99,7 +99,7 @@ abstract class UserFunctions : FlowLogic<SignedTransaction>() {
             val gson = GsonBuilder().create()
             val jsonWholeObject = gson.fromJson(stringBuff.toString(), JsonObject::class.java)
             val rates = jsonWholeObject.get("rates").asJsonObject
-            return rates.get("PHP").asLong
+            return rates.get("PHP").asDouble
         }
     }
 }

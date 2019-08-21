@@ -37,18 +37,20 @@ class ExchangeFlow (private val amount: Long,
             val tokens = FiatCurrency.getInstance(currency)
             subFlow(IssueTokens(listOf(amount of tokens issuedBy ourIdentity heldBy ourIdentity)))
             //subFlow merge after issuing tokens
-            mergeFungibleTokens(currency)
+
             if (currency == "USD")
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
-                val amountWithCurrency = (amount * returnExternalPhp().toDouble()).times(100)
-                subFlow(RedeemFungibleTokens(Amount(amountWithCurrency.toLong(), TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)), walletReduced.issuer))
+                val amountWithCurrency = (amount * returnExternalPhp()).toBigDecimal()
+                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+                subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
             }
             else if (currency == "PHP")
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
-                val amountWithCurrency = (amount / returnExternalPhp().toDouble()).times(100)
-                subFlow(RedeemFungibleTokens(Amount(amountWithCurrency.toLong(), TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)), walletReduced.issuer))
+                val amountWithCurrency = (amount / returnExternalPhp()).toBigDecimal()
+                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+                subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
             }
         }
 
@@ -74,7 +76,7 @@ class ExchangeFlow (private val amount: Long,
         // Currency to be filtered
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == currency }
         val newUserWallet = user.wallet.minus(filteredListOfWallet[0])
-        val newQuantity = filteredListOfWallet[0].quantity - (amount.times(100))
+        val newQuantity = filteredListOfWallet[0].quantity - (amount * 100)
         val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
         val updatedUserWallet = newUserWallet.plus(newElement).toMutableList()
 
@@ -83,12 +85,12 @@ class ExchangeFlow (private val amount: Long,
         val exchangeUserWallet = updatedUserWallet.minus(exchangeFilteredWallet[0])
         return if (currency == "USD")
         {
-            val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount * returnExternalPhp()).times(100))
-            val exchangeElement = Amount(exchangeQuantity, TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
+            val exchangeQuantity = (exchangeFilteredWallet[0].quantity / 100) + (amount * returnExternalPhp())
+            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
             exchangeUserWallet.plus(exchangeElement).toMutableList()
         } else {
-            val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount / returnExternalPhp()).times(100))
-            val exchangeElement = Amount(exchangeQuantity, TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
+            val exchangeQuantity = (exchangeFilteredWallet[0].quantity / 100) + (amount / returnExternalPhp())
+            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
             exchangeUserWallet.plus(exchangeElement).toMutableList()
         }
     }
