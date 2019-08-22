@@ -1,4 +1,4 @@
-package corexchange.issuerflows
+package corexchange.corexflows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
@@ -7,6 +7,7 @@ import net.corda.core.flows.*
 import net.corda.core.contracts.*
 import net.corda.core.transactions.*
 import corexchange.contracts.OrderContract
+import corexchange.issuerflows.IssuerFunctions
 import corexchange.states.OrderState
 
 @InitiatingFlow

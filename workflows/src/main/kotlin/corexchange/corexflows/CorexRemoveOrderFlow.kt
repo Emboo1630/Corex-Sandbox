@@ -1,8 +1,9 @@
-package corexchange.issuerflows
+package corexchange.corexflows
 
 import co.paralleluniverse.fibers.Suspendable
 import corexchange.*
 import corexchange.contracts.OrderContract
+import corexchange.issuerflows.IssuerFunctions
 import net.corda.core.contracts.Command
 import net.corda.core.flows.*
 import net.corda.core.transactions.*

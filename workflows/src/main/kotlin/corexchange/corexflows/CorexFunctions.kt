@@ -14,6 +14,7 @@ import net.corda.core.contracts.*
 import net.corda.core.transactions.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
+import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.queryBy
@@ -53,5 +54,10 @@ abstract class CorexFunctions : FlowLogic<SignedTransaction>()
     fun stringToStateRef(stateRef: String): StateRef
     {
         return StateRef(txhash = SecureHash.parse(stateRef), index = 0)
+    }
+
+    fun stringToNotary(notary: String): CordaX500Name
+    {
+        return CordaX500Name.parse(notary)
     }
 }

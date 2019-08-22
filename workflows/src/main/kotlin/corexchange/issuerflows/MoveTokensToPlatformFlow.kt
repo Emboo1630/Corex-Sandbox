@@ -3,9 +3,9 @@ package corexchange.issuerflows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.utilities.*
 import com.r3.corda.lib.tokens.money.FiatCurrency
-import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokens
 import com.r3.corda.lib.tokens.workflows.flows.rpc.MoveFungibleTokens
 import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
+import corexchange.corexflows.CorexRemoveOrderFlow
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC

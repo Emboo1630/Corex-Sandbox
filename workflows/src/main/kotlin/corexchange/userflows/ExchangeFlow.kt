@@ -42,14 +42,16 @@ class ExchangeFlow (private val amount: Long,
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
                 val amountWithCurrency = (amount * returnExternalPhp()).toBigDecimal()
-                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+//                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+                val tokenType = FiatCurrency.getInstance(walletReduced.tokenType.tokenIdentifier)
                 subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
             }
             else if (currency == "PHP")
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
                 val amountWithCurrency = (amount / returnExternalPhp()).toBigDecimal()
-                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+//                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+                val tokenType = FiatCurrency.getInstance(walletReduced.tokenType.tokenIdentifier)
                 subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
             }
         }
@@ -77,7 +79,9 @@ class ExchangeFlow (private val amount: Long,
         val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == currency }
         val newUserWallet = user.wallet.minus(filteredListOfWallet[0])
         val newQuantity = filteredListOfWallet[0].quantity - (amount * 100)
-        val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
+        val tokenType = FiatCurrency.getInstance(currency)
+//        val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
+        val newElement = Amount(newQuantity, tokenType)
         val updatedUserWallet = newUserWallet.plus(newElement).toMutableList()
 
         // Currency to be exchanged
@@ -86,11 +90,13 @@ class ExchangeFlow (private val amount: Long,
         return if (currency == "USD")
         {
             val exchangeQuantity = (exchangeFilteredWallet[0].quantity / 100) + (amount * returnExternalPhp())
-            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
+            val exchangeTokenType = FiatCurrency.getInstance(exchangeFilteredWallet[0].token.tokenIdentifier)
+            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), exchangeTokenType)
             exchangeUserWallet.plus(exchangeElement).toMutableList()
         } else {
             val exchangeQuantity = (exchangeFilteredWallet[0].quantity / 100) + (amount / returnExternalPhp())
-            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
+            val exchangeTokenType = FiatCurrency.getInstance(exchangeFilteredWallet[0].token.tokenIdentifier)
+            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), exchangeTokenType)
             exchangeUserWallet.plus(exchangeElement).toMutableList()
         }
     }
