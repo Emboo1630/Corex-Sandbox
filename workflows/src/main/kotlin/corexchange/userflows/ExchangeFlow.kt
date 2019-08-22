@@ -1,43 +1,59 @@
 package corexchange.userflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.contracts.utilities.of
+import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokens
 import com.r3.corda.lib.tokens.workflows.flows.rpc.RedeemFungibleTokens
 import com.r3.corda.lib.tokens.workflows.utilities.getPreferredNotary
 import corexchange.*
 import corexchange.contracts.UserContract
-import corexchange.states.UserState
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Command
-import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.CollectSignaturesFlow
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClientBuilder
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 @StartableByRPC
 class ExchangeFlow (private val amount: Long,
                     private val currency: String,
                     private val userId: String,
-                    private val walletRef: String): UserFunctions()
+                    private val walletRefIncreased: String,
+                    private val walletRefReduced: String): UserFunctions()
 {
     @Suspendable
     override fun call(): SignedTransaction
     {
         // Update Corex Wallet
-        val wallet = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRef)).state.data
-        if (wallet.tokenType.tokenIdentifier == "PHP" || wallet.tokenType.tokenIdentifier == "USD")
+        val walletRefIncreased = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefIncreased)).state.data
+        if (walletRefIncreased.tokenType.tokenIdentifier == "PHP" || walletRefIncreased.tokenType.tokenIdentifier == "USD")
         {
-            val amountWithCurrency = amount * 100
-            subFlow(RedeemFungibleTokens(Amount(amountWithCurrency, TokenType(wallet.tokenType.tokenIdentifier, wallet.tokenType.fractionDigits)), wallet.issuer))
+            val tokens = FiatCurrency.getInstance(currency)
+            subFlow(IssueTokens(listOf(amount of tokens issuedBy ourIdentity heldBy ourIdentity)))
+            //subFlow merge after issuing tokens
+
+            if (currency == "USD")
+            {
+                val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
+                val amountWithCurrency = (amount * returnExternalPhp()).toBigDecimal()
+//                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+                val tokenType = FiatCurrency.getInstance(walletReduced.tokenType.tokenIdentifier)
+                subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
+            }
+            else if (currency == "PHP")
+            {
+                val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
+                val amountWithCurrency = (amount / returnExternalPhp()).toBigDecimal()
+//                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
+                val tokenType = FiatCurrency.getInstance(walletReduced.tokenType.tokenIdentifier)
+                subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
+            }
         }
 
         /**
@@ -59,45 +75,29 @@ class ExchangeFlow (private val amount: Long,
     {
         val user = inputUserRefUsingLinearID(stringToLinearID(userId)).state.data
 
-        // External Data
-        val httpclient = HttpClientBuilder.create().build()
-        val request = HttpGet("https://api.exchangeratesapi.io/latest?base=USD&symbols=PHP,USD")
-        val response = httpclient.execute(request)
-        val inputStreamReader = InputStreamReader(response.entity.content)
+        // Currency to be filtered
+        val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == currency }
+        val newUserWallet = user.wallet.minus(filteredListOfWallet[0])
+        val newQuantity = filteredListOfWallet[0].quantity - (amount * 100)
+        val tokenType = FiatCurrency.getInstance(currency)
+//        val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
+        val newElement = Amount(newQuantity, tokenType)
+        val updatedUserWallet = newUserWallet.plus(newElement).toMutableList()
 
-        BufferedReader(inputStreamReader).use {
-            val stringBuff = StringBuffer()
-            var inputLine = it.readLine()
-            while (inputLine != null) {
-                stringBuff.append(inputLine)
-                inputLine = it.readLine()
-            }
-
-            val gson = GsonBuilder().create()
-            val jsonWholeObject = gson.fromJson(stringBuff.toString(), JsonObject::class.java)
-            val rates = jsonWholeObject.get("rates").asJsonObject
-            val php = rates.get("PHP").asLong
-
-            // Currency to be filtered
-            val filteredListOfWallet = user.wallet.filter { x -> x.token.tokenIdentifier == currency }
-            val newUserWallet = user.wallet.minus(filteredListOfWallet[0])
-            val newQuantity = filteredListOfWallet[0].quantity - (amount * 100)
-            val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
-            val updatedUserWallet = newUserWallet.plus(newElement).toMutableList()
-
-            // Currency to be exchanged
-            val exchangeFilteredWallet = updatedUserWallet.filter { x -> x.token.tokenIdentifier != currency }
-            val exchangeUserWallet = updatedUserWallet.minus(exchangeFilteredWallet[0])
-            return if (currency == "USD")
-            {
-                val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount * php) * 100)
-                val exchangeElement = Amount(exchangeQuantity, TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
-                exchangeUserWallet.plus(exchangeElement).toMutableList()
-            } else {
-                val exchangeQuantity = exchangeFilteredWallet[0].quantity + ((amount / php) * 100)
-                val exchangeElement = Amount(exchangeQuantity, TokenType(exchangeFilteredWallet[0].token.tokenIdentifier, exchangeFilteredWallet[0].token.fractionDigits))
-                exchangeUserWallet.plus(exchangeElement).toMutableList()
-            }
+        // Currency to be exchanged
+        val exchangeFilteredWallet = updatedUserWallet.filter { x -> x.token.tokenIdentifier != currency }
+        val exchangeUserWallet = updatedUserWallet.minus(exchangeFilteredWallet[0])
+        return if (currency == "USD")
+        {
+            val exchangeQuantity = (exchangeFilteredWallet[0].quantity / 100) + (amount * returnExternalPhp())
+            val exchangeTokenType = FiatCurrency.getInstance(exchangeFilteredWallet[0].token.tokenIdentifier)
+            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), exchangeTokenType)
+            exchangeUserWallet.plus(exchangeElement).toMutableList()
+        } else {
+            val exchangeQuantity = (exchangeFilteredWallet[0].quantity / 100) + (amount / returnExternalPhp())
+            val exchangeTokenType = FiatCurrency.getInstance(exchangeFilteredWallet[0].token.tokenIdentifier)
+            val exchangeElement = Amount.fromDecimal(exchangeQuantity.toBigDecimal(), exchangeTokenType)
+            exchangeUserWallet.plus(exchangeElement).toMutableList()
         }
     }
 
