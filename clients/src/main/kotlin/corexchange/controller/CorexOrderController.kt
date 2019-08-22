@@ -1,7 +1,7 @@
 package corexchange.controller
 
 import com.fasterxml.jackson.databind.SerializationFeature
-import corexchange.issuerflows.CorexOrderFlow
+import corexchange.corexflows.CorexOrderFlow
 import corexchange.issuerflows.VerifyOrderFlow
 import corexchange.models.*
 import corexchange.states.OrderState

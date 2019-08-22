@@ -1,7 +1,6 @@
 package corexchange.controller
 
 import com.fasterxml.jackson.databind.SerializationFeature
-import corexchange.corexflows.ShareInfoFlow
 import corexchange.corexflows.TransferTokensToUserFlow
 import corexchange.models.*
 import corexchange.states.UserState
@@ -76,15 +75,13 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
             val register = CorexRegisterModel(
                     name = registerModel.name,
                     amount = registerModel.amount,
-                    currency = registerModel.currency,
-                    fractionDigits = registerModel.fractionDigits
+                    currency = registerModel.currency
             )
             val flowReturn = proxy.startFlowDynamic(
                     UserRegisterFlow::class.java,
                     register.name,
                     register.amount,
-                    register.currency,
-                    register.fractionDigits
+                    register.currency
             )
             flowHandlerCompletion.flowHandlerCompletion(flowReturn)
             HttpStatus.CREATED to registerModel
@@ -147,35 +144,35 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     /**
      * Share info from platform to an issuer
      */
-    @PostMapping(value = ["share/info"], produces = ["application/json"])
-    private fun corexShareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
-    {
-        val (status, result) = try {
-            val share = CorexShareInfoModel(
-                    recipient = shareInfoModel.recipient
-            )
-            val flowReturn = proxy.startFlowDynamic(
-                    ShareInfoFlow::class.java,
-                    share.recipient
-            )
-            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
-            HttpStatus.CREATED to shareInfoModel
-        } catch (e: Exception) {
-            HttpStatus.BAD_REQUEST to e
-        }
-        val stat = "status" to status
-        val mess = if (status == HttpStatus.CREATED)
-        {
-            "message" to "Successful"
-        }
-        else
-        {
-            "message" to "Failed"
-        }
-
-        val res = "result" to result
-        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
-    }
+//    @PostMapping(value = ["share/info"], produces = ["application/json"])
+//    private fun corexShareInfo(@RequestBody shareInfoModel: CorexShareInfoModel): ResponseEntity<Map<String,Any>>
+//    {
+//        val (status, result) = try {
+//            val share = CorexShareInfoModel(
+//                    recipient = shareInfoModel.recipient
+//            )
+//            val flowReturn = proxy.startFlowDynamic(
+//                    ShareInfoFlow::class.java,
+//                    share.recipient
+//            )
+//            flowHandlerCompletion.flowHandlerCompletion(flowReturn)
+//            HttpStatus.CREATED to shareInfoModel
+//        } catch (e: Exception) {
+//            HttpStatus.BAD_REQUEST to e
+//        }
+//        val stat = "status" to status
+//        val mess = if (status == HttpStatus.CREATED)
+//        {
+//            "message" to "Successful"
+//        }
+//        else
+//        {
+//            "message" to "Failed"
+//        }
+//
+//        val res = "result" to result
+//        return ResponseEntity.status(status).body(mapOf(stat, mess, res))
+//    }
 
     /**
      * Transfer tokens from platform to user, remove pre-order states and update corex wallet

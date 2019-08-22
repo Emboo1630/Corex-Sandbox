@@ -42,7 +42,6 @@ class ExchangeFlow (private val amount: Long,
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
                 val amountWithCurrency = (amount * returnExternalPhp()).toBigDecimal()
-//                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
                 val tokenType = FiatCurrency.getInstance(walletReduced.tokenType.tokenIdentifier)
                 subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
             }
@@ -50,7 +49,6 @@ class ExchangeFlow (private val amount: Long,
             {
                 val walletReduced = serviceHub.toStateAndRef<FungibleToken>(stringToStateRef(walletRefReduced)).state.data
                 val amountWithCurrency = (amount / returnExternalPhp()).toBigDecimal()
-//                val tokenType = TokenType(walletReduced.tokenType.tokenIdentifier, walletReduced.tokenType.fractionDigits)
                 val tokenType = FiatCurrency.getInstance(walletReduced.tokenType.tokenIdentifier)
                 subFlow(RedeemFungibleTokens(Amount.fromDecimal(amountWithCurrency, token = tokenType), walletReduced.issuer))
             }
@@ -80,7 +78,6 @@ class ExchangeFlow (private val amount: Long,
         val newUserWallet = user.wallet.minus(filteredListOfWallet[0])
         val newQuantity = filteredListOfWallet[0].quantity - (amount * 100)
         val tokenType = FiatCurrency.getInstance(currency)
-//        val newElement = Amount(newQuantity, TokenType(currency, filteredListOfWallet[0].token.fractionDigits))
         val newElement = Amount(newQuantity, tokenType)
         val updatedUserWallet = newUserWallet.plus(newElement).toMutableList()
 

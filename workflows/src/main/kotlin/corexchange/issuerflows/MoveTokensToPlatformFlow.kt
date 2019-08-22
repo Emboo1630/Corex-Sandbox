@@ -14,7 +14,6 @@ import net.corda.core.transactions.SignedTransaction
 @InitiatingFlow
 @StartableByRPC
 class MoveTokensToPlatformFlow (private val recipient: String,
-
                                 private val orderId: String): IssuerFunctions()
 {
     @Suspendable

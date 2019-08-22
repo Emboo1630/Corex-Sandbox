@@ -18,8 +18,7 @@ data class CorexUserModel(
 data class CorexRegisterModel @JsonCreator constructor(
         val name: String,
         val amount: MutableList<Long>,
-        val currency: MutableList<String>,
-        val fractionDigits: MutableList<Int>
+        val currency: MutableList<String>
 )
 
 data class CorexMoveTokensFromUserToUserModel @JsonCreator constructor(
