@@ -8,6 +8,8 @@ import corexchange.models.*
 import corexchange.webserver.NodeRPCConnection
 import corexchange.webserver.utilities.FlowHandlerCompletion
 import corexchange.webserver.utilities.Plugin
+import net.corda.core.contracts.hash
+import net.corda.core.crypto.SecureHash
 import net.corda.core.messaging.vaultQueryBy
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -31,16 +33,15 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
     @GetMapping(value = ["get/fungible"], produces = ["application/json"])
     private fun getFungibleTokens(): ResponseEntity<Map<String, Any>>
     {
-        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+//        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val infoStateRef = proxy.vaultQueryBy<FungibleToken>().states
-            val infoStates = infoStateRef.map { it.state.data }
-            val infoRef = infoStateRef.map { it.ref.txhash }.single()
+            val infoStates = infoStateRef.map { it }
             val list = infoStates.map {
-                CorexFungibleTokenModel(
-                        amount = it.amount.toString(),
-                        holder = it.holder.toString(),
-                        hash = infoRef.toString()
+                    CorexFungibleTokenModel(
+                        amount = it.state.data.amount.toString(),
+                        holder = it.state.data.holder.toString(),
+                        hash = it.ref.txhash.toString()
                 )
             }
             HttpStatus.CREATED to list
