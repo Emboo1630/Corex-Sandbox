@@ -212,22 +212,19 @@ class CorexUserController(rpc: NodeRPCConnection, private val flowHandlerComplet
     }
 
     /**
-
      * Return Self
-
      */
-    @GetMapping(value= "/me", produces = ["application/json"])
+    @GetMapping(value= ["/me"], produces = ["application/json"])
     private fun me() : ResponseEntity<ResponseModel>{
         val myIdentity = proxy.nodeInfo().legalIdentities.first().name.organisation
         val res = ResponseModel("success", "Successful in getting my identity", myIdentity)
         return ResponseEntity.status(200).body(res)
     }
+
     /**
-
      * Return peers
-
      */
-    @GetMapping(value= "/peers", produces = ["application/json"])
+    @GetMapping(value= ["/peers"], produces = ["application/json"])
     private fun peers() : ResponseEntity<ResponseModel>{
         val peers = proxy.networkMapSnapshot().map { it.legalIdentities.first().name.organisation }
         val res = ResponseModel("success", "Successful in getting peers", peers)
