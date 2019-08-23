@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("corextoken")
 class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandlerCompletion: FlowHandlerCompletion, private val plugin: Plugin)
 {
@@ -33,7 +34,6 @@ class CorexFungibleTokenController(rpc: NodeRPCConnection, private val flowHandl
     @GetMapping(value = ["get/fungible"], produces = ["application/json"])
     private fun getFungibleTokens(): ResponseEntity<Map<String, Any>>
     {
-//        plugin.registerModule().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         val (status, result) = try {
             val infoStateRef = proxy.vaultQueryBy<FungibleToken>().states
             val infoStates = infoStateRef.map { it }
